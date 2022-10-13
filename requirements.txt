@@ -1,4 +1,3 @@
-python -m venv .venv
 .venv\scripts\activate
 flask
 requests
