@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 
 from flask import Flask, request
 
-from methods.index import methods
+from methods import methods
 
 app = Flask(__name__)
 
