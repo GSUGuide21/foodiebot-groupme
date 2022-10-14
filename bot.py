@@ -13,10 +13,8 @@ from methods import methods
 
 app = Flask(__name__)
 
-with open(".secret", "r") as f:
-	secrets = json.loads(f.read())
-	bot_id = secrets["bot_id"]
-	app_id = secrets["app_id"]
+bot_id = os.environ.get("bot_id", "")
+app_id = os.environ.get("app_id", "")
 
 def handle(sender, message: str | None, bot_id, app_id):
 	"""Route commands to the correct module function"""
