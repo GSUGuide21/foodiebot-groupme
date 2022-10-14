@@ -1,4 +1,4 @@
-from commands.help import help
+from commands import help
 
 methods = {
 	"help": help,
