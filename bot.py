@@ -33,11 +33,9 @@ def receive():
 	sender = request.get_json()["name"]
 	message = request.get_json()["text"]
 	
-	if sender == "foodiebot":
-		return "ok", 200
-	
 	if message and len(message) > 0 and message[0] == "$":
 		result = handle(sender, message, bot_id, app_id)
+		print(result)
 		if result: reply(result)
 	#elif 
 	print(f'INCOMING REQUEST FROM {request.remote_addr}')
