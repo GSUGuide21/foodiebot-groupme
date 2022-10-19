@@ -32,9 +32,7 @@ def receive():
 	"""Handles requests from GroupMe"""
 	sender = request.get_json()["name"]
 	message = request.get_json()["text"]
-
-	print(message)
-
+	
 	if sender == "foodiebot":
 		return "ok", 200
 	
@@ -48,6 +46,8 @@ def receive():
 def reply(message):
 	"""Replies to a message in the chat"""
 	url = 'https://api.groupme.com/v3/bots/post'
+
+	print(message)
 	
 	if message == None or message == "None":
 		return None
