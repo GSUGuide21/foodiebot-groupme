@@ -16,7 +16,7 @@ from methods import commands, system
 from utils import Message, SenderType
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
 
 BOT_ID = os.environ.get("bot_id", "")
 APP_ID = os.environ.get("app_id", "")
@@ -25,11 +25,13 @@ API_URL = "https://api.groupme.com/v3/bots"
 
 MAX_MESSAGE_LENGTH = 1000
 
+"""
 class Response(db.Model):
 	__tablename__ = "responses"
 	name = db.Column(db.String(64), primary_key=True)
 	content = db.Column(db.String(256))
 	image_url = db.Column(db.String(128))
+"""
 
 @app.route("/", methods=["POST"])
 def receive():
