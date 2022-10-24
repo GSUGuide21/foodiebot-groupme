@@ -47,6 +47,7 @@ def process(message):
 	responses = []
 	username = message.name
 
+	print(f"Sender name: {username}")
 	if message.sender_type == SenderType.User:
 		if message.text.startswith(PREFIX):
 			parts: list[str] = message.text[len(PREFIX):].strip().split(None, 1)
@@ -71,10 +72,9 @@ def process(message):
 						responses.append(f"The command ({command}) does not exist!")
 				else:
 					commands_info = [f"{PREFIX}{command}: {commands[command].DESCRIPTION}" for command in commands]
-					descriptions = '\n'.join(commands_info)
-					result = f"""---Help---{'\n'}
-					{descriptions}
-					"""
+					result = """---Help---\n
+					{}
+					""".format("\n".join(commands_info))
 
 					responses.append(result)
 	if message.sender_type == SenderType.System:
