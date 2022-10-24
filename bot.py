@@ -71,8 +71,9 @@ def process(message):
 						responses.append(f"The command ({command}) does not exist!")
 				else:
 					commands_info = [f"{PREFIX}{command}: {commands[command].DESCRIPTION}" for command in commands]
-					result = f"""---Help---
-					{commands_info.join("\n")}
+					descriptions = '\n'.join(commands_info)
+					result = f"""---Help---{'\n'}
+					{descriptions}
 					"""
 
 					responses.append(result)
