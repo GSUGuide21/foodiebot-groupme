@@ -8,7 +8,7 @@ API_URL = "https://api.groupme.com/v3/groups"
 IMAGE_URL = "https://image.groupme.com/pictures"
 
 class Command:
-	DESCRIPTION = ""
+	DESCRIPTION = "No description."
 	MINIMUM_ARGUMENTS = 0
 	ARGUMENT_WARNING = "Not enough arguments provided! Please add more after the command."
 	ACCESS_TOKEN = os.environ.get("access_token")

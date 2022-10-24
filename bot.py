@@ -70,7 +70,7 @@ def process(message):
 					else:
 						responses.append(f"The command ({command}) does not exist!")
 				else:
-					commands_info = [f"{PREFIX}{command}: {commands[command].DESCRIPTION or "No description"}" for command in commands]
+					commands_info = [f"{PREFIX}{command}: {commands[command].DESCRIPTION}" for command in commands]
 					result = f"""---Help---
 					{commands_info.join("\n")}
 					"""
@@ -106,7 +106,7 @@ def send(message, group_id):
 			time.sleep(0.3)
 		
 		data["text"] = ""
-	else
+	else:
 		data["text"] = message
 
 	if image is not None:
