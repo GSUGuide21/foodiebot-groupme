@@ -1,1 +1,6 @@
-from .help import *
+from .base import Command
+from .coin import Coin
+
+commands = {
+	"coin": Coin()
+}

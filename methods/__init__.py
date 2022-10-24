@@ -1,6 +1,2 @@
-from .commands import help
-
-methods = {
-	"help": help,
-	"coin": "heads, tails"
-}
+from .commands import commands
+from .system import system
