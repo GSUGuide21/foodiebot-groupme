@@ -50,6 +50,7 @@ def process(message):
 	username = message.name
 
 	print(f"Sender name: {username}")
+	print(f"Sender type: {message.sender_type}")
 
 	if message.sender_type == SenderType.User:
 		if message.text.startswith(PREFIX):
@@ -87,10 +88,12 @@ def process(message):
 					""".format("\n".join(commands_info))
 
 					responses.append(result)
+
 	if message.sender_type == SenderType.System:
 		for option in system:
-			if system[option].RegExp.match(message.text):
-				responses.append(system[option].initialize(message))
+			if system[option].REGEX.match(message.text):
+				matches = system[option].REGEX.findall(message.text)
+				responses.append(system[option].response(message, matches))
 
 	return responses
 
