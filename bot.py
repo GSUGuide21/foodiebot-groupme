@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
-from methods import commands, system, Command
+from methods import commands, system
 from utils import Message, SenderType
 
 app = Flask(__name__)
