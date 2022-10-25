@@ -1,6 +1,8 @@
 from .base import Command
 from .coin import Coin
+from .herewego import HereWeGo
 
 commands = {
-	"coin": Coin()
+	"coin": Coin(),
+	"herewego": HereWeGo()
 }
