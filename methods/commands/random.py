@@ -5,7 +5,7 @@ from .base import Command
 
 class Random(Command):
 	def handle_args(self, result: str | None):
-		result = [result for result in self.lines(result)]
+		result = [result for result in self.spaces(result)]
 
 		a = int(result[0] or 0)
 		b = int(result[1] or 5)
