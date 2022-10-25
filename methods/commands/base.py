@@ -22,7 +22,7 @@ class Command:
 		return "👋" + random.choice("🏻🏼🏽🏾🏿")
 	
 	def has_args(self, query):
-		return self.lines(query) >= self.MINIMUM_ARGUMENTS
+		return len(self.lines(query)) >= self.MINIMUM_ARGUMENTS
 
 	def handle_args(self, result):
 		return result
