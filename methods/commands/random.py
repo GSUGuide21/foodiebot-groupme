@@ -4,6 +4,9 @@ import re
 from .base import Command
 
 class Random(Command):
+	DESCRIPTION = "Rolls a die on a random number"
+	ALIASES = ["roll", "dice"]
+	
 	def handle_args(self, result: str | None):
 		result = [result for result in self.spaces(result)]
 
