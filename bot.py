@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
-from methods import commands, system
+from methods import commands, system, responses
 from utils import Message, SenderType
 
 app = Flask(__name__)
@@ -46,7 +46,7 @@ def reply(message, group_id):
 	send(result, group_id)
 
 def process(message):
-	responses = []
+	bot_responses = []
 	username = message.name
 
 	print(f"Sender name: {username}")
@@ -58,44 +58,45 @@ def process(message):
 			command = parts.pop(0).lower()
 			query = parts[0] if len(parts) > 0 else ""
 
-			print(parts, query, command)
-
 			if PREFIX in command:
 				pass
 				
 			elif command in commands:
 				current_command = commands[command]
 				if not current_command.has_args(query):
-					responses.append(current_command.ARGUMENT_WARNING)
+					bot_responses.append(current_command.ARGUMENT_WARNING)
 				else:
 					response = current_command.response(query, message, BOT_ID, APP_ID)
 					if response != None:
 						print(response)
-						responses.append(response)
+						bot_responses.append(response)
 
 			elif command == "help":
 				if query:
 					query = query.strip(PREFIX)
 					if query in commands:
 						description = commands[query]["description"]
-						responses.append(f"{PREFIX}{query}: {description}")
+						bot_responses.append(f"{PREFIX}{query}: {description}")
 					else:
-						responses.append(f"The command ({command}) does not exist!")
+						bot_responses.append(f"The command ({command}) does not exist!")
 				else:
 					commands_info = [f"{PREFIX}{command}: {commands[command].DESCRIPTION}" for command in commands]
 					result = """---Help---\n
 					{}
 					""".format("\n".join(commands_info))
 
-					responses.append(result)
+					bot_responses.append(result)
+		else:
+			for key, value in responses.items():
+				current_response = responses[key]
 
 	if message.sender_type == SenderType.System:
 		for option in system:
 			if system[option].REGEX.match(message.text):
 				matches = system[option].REGEX.findall(message.text)
-				responses.append(system[option].response(message, matches))
+				bot_responses.append(system[option].response(message, matches))
 
-	return responses
+	return bot_responses
 
 def send(message, group_id):
 	if isinstance(message, list):

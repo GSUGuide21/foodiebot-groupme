@@ -1,0 +1,3 @@
+Essay bot detected in the group chat. Please ban them from the group chat immediately. (name: %user%)
+WARNING: Essay bot, %user%, has been found. Please send them to the Shadow Realm.
+ESSAY BOT WARNING!!!! NAME: %user%! EXTERMINATE IMMEDIATELY!

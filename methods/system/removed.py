@@ -11,7 +11,7 @@ class Removed(SystemCommand):
 		with open("assets/text/removed.txt") as f:
 			self.responses = f.readlines()
 
-	def response(self, message, matches: list[str]):
+	def response(self, message, matches: list[str] | None):
 		performer, target = matches
 
 		data = { 

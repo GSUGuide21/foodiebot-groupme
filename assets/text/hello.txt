@@ -1,0 +1,5 @@
+%wave% Hello, %user%! I hope you are having a wonderful day.
+%wave% Hey, %user%!
+%user%, thank you for acknowledging me today.
+Hello %user%! It's starting to get a little lonely in here.
+%user%, say hello to your mama!
