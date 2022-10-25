@@ -6,7 +6,7 @@ class HereWeGo(ImageCommand):
 
 	def has_args(self, query):
 		return True
-		
-	def response(self):
+
+	def response(self, query, message, bot_id, app_id):
 		image = Image.open("assets/herewego.png")
 		return "", self.upload_pil_image(image, "GIF")
