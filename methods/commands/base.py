@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import random
 from io import BytesIO
@@ -19,8 +20,14 @@ class Command:
 	def wave(self):
 		return "👋" + random.choice("🏻🏼🏽🏾🏿")
 	
+	def has_args(self, query):
+		return 
+
 	def handle_args(self, result):
 		return result
+
+	def spaces(self, query):
+		return [line for line in re.split(r"\s+", query) if line != ""]
 
 	def lines(self, query):
 		return [line for line in query.split("\n") if line != ""]

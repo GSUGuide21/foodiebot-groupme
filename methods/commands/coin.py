@@ -5,11 +5,14 @@ class Coin(Command):
 	DESCRIPTION = "Flips a coin!"
 	COINS = ["heads", "tails"]
 
+	def has_args(self, query):
+		return len(self.spaces(query)) >= self.MINIMUM_ARGUMENTS
+
 	def handle_args(self, query: str | None=""):
 		if query is None or query == "":
 			return query
 		
-		parts = query.split(" ")
+		parts = self.spaces(query)
 		display = parts[0]
 
 		return display.lower()

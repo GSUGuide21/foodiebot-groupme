@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
-from methods import commands, system
+from methods import commands, system, Command
 from utils import Message, SenderType
 
 app = Flask(__name__)
@@ -50,19 +50,27 @@ def process(message):
 	username = message.name
 
 	print(f"Sender name: {username}")
+
 	if message.sender_type == SenderType.User:
 		if message.text.startswith(PREFIX):
 			parts: list[str] = message.text[len(PREFIX):].strip().split(None, 1)
 			command = parts.pop(0).lower()
 			query = parts[0] if len(parts) > 0 else ""
 
-			print(parts, query)
+			print(parts, query, command)
 
 			if PREFIX in command:
 				pass
 				
 			elif command in commands:
-				response = commands[command].response(query, message, BOT_ID, APP_ID)
+				current_command = commands[command]
+				if not current_command.has_args(query):
+					responses.append(current_command.ARGUMENT_WARNING)
+				else:
+					response = current_command.response(query, message, BOT_ID, APP_ID)
+					if response != None:
+						print(response)
+						responses.append(response)
 
 			elif command == "help":
 				if query:
