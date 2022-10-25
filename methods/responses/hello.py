@@ -17,4 +17,4 @@ class Hello(Response):
 		result = random.choice(self.responses)
 		result = self.WAVE_PATTERN.sub(self.wave(), result)
 		result = self.USERNAME_REGEX.sub(message.name, result)
-
+		return result
