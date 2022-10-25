@@ -1,5 +1,8 @@
+import os
 from .base import ImageCommand
 from PIL import Image
+
+cwd = os.getcwd()
 
 class HereWeGo(ImageCommand):
 	DESCRIPTION = 'Sends an "Ah shit, here we go again" meme'
@@ -8,5 +11,5 @@ class HereWeGo(ImageCommand):
 		return True
 
 	def response(self, query, message, bot_id, app_id):
-		image = Image.open("assets/images/herewego.png")
+		image = Image.open(f"{cwd}/assets/images/herewego.png")
 		return "", self.upload_pil_image(image, "GIF")
