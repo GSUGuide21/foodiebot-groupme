@@ -3,6 +3,7 @@ from .base import Command
 
 class Coin(Command):
 	DESCRIPTION = "Flips a coin!"
+	ALIASES = ["flip", "coinflip"]
 	COINS = ["heads", "tails"]
 
 	def has_args(self, query):

@@ -13,6 +13,7 @@ class Command:
 	MINIMUM_ARGUMENTS = 0
 	ARGUMENT_WARNING = "Not enough arguments provided! Please add more after the command."
 	ACCESS_TOKEN = os.environ.get("access_token")
+	ALIASES = []
 
 	def __init__(self):
 		print(f"Command loaded {self.__class__.__name__}")
@@ -21,7 +22,7 @@ class Command:
 		return "👋" + random.choice("🏻🏼🏽🏾🏿")
 	
 	def has_args(self, query):
-		return 
+		return
 
 	def handle_args(self, result):
 		return result
@@ -88,9 +89,9 @@ class ImageCommand(Command):
 
 		return image
 
-	def upload_pil_image(self, image: Image):
+	def upload_pil_image(self, image: Image, image_format="JPEG"):
 		output = BytesIO()
-		image.save(output, format="JPEG", mode="RGB")
+		image.save(output, format=image_format, mode="RGB")
 		return self.upload_image(output.getvalue())
 
 	def pil_from_url(self, url):
