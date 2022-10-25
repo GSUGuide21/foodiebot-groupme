@@ -8,5 +8,5 @@ class HereWeGo(ImageCommand):
 		return True
 
 	def response(self, query, message, bot_id, app_id):
-		image = Image.open("assets/herewego.png")
+		image = Image.open("assets/images/herewego.png")
 		return "", self.upload_pil_image(image, "GIF")
