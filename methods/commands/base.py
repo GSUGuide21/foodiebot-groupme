@@ -3,7 +3,7 @@ import re
 import requests
 import random
 from io import BytesIO
-from PIL import Image, ExifTags
+from PIL import Image, ExifTags, ImageSequence
 
 API_URL = "https://api.groupme.com/v3/groups"
 IMAGE_URL = "https://image.groupme.com/pictures"
@@ -92,6 +92,14 @@ class ImageCommand(Command):
 	def upload_pil_image(self, image: Image, image_format="JPEG"):
 		output = BytesIO()
 		image.save(output, format=image_format, mode="RGB")
+		return self.upload_image(output.getvalue())
+	
+	def upload_gif_image(self, original: Image):
+		output = BytesIO()
+		duration = original.info["duration"]
+		frames = [frame.copy() for frame in ImageSequence.Iterator(original)]
+		image = next(frames)
+		image.save(output, format="GIF", append_images=frames, save_all=True, duration=duration/1000.0,loop=1)
 		return self.upload_image(output.getvalue())
 
 	def pil_from_url(self, url):

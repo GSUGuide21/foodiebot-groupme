@@ -88,7 +88,7 @@ def process(message):
 					bot_responses.append(result)
 		else:
 			for key, value in responses.items():
-				if value.REGEX.match(message.text):
+				if value.REGEX and value.REGEX.match(message.text):
 					matches = value.REGEX.findall(message.text)
 					result = value.respond(message, matches)
 					bot_responses.append(result)

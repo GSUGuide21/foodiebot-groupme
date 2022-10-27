@@ -4,14 +4,16 @@ import random
 from .base import Response
 
 class Hello(Response):
-	REGEX = re.compile(r"(?:H(?:e(?:y|llo)|i)|W(?:hat\'s up|assup)) FoodieBot!?", flags=re.IGNORECASE)
-	USERNAME_REGEX = re.compile(r"%USER(?:NAME|)%", flags=re.IGNORECASE | re.MULTILINE)
-	WAVE_PATTERN = re.compile(r"%WAVE%", flags=re.IGNORECASE | re.MULTILINE)
+	#REGEX = re.compile(r"(?:H(?:e(?:y|llo)|i)|W(?:hat\'s up|assup)) FoodieBot!?", flags=re.IGNORECASE)
 
 	def __init__(self):
 		super().__init__()
-		with open("assets/text/hello.txt") as f:
-			self.responses = f.readlines()
+		with open("assets/triggers/hello.txt") as f:
+			parts = [re.escape(line) for line in f.readlines() if line != ""]
+			self.REGEX = re.compile(fr"{str.join('|', parts)}", flags=re.IGNORECASE | re.MULTILINE)
+
+		with open("assets/text/hello.txt") as g:
+			self.responses = g.readlines()
 
 	def respond(self, message, matches: list[str] | None):
 		result = random.choice(self.responses)

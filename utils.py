@@ -12,8 +12,6 @@ def process_args(text: str | None, args_type="string") -> str | list[str]:
 
 	return ""
 
-process_args("Hello World", "list")
-
 class SenderType(Enum):
 	User = "user"
 	Bot = "bot"
