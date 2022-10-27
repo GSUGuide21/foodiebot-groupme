@@ -9,7 +9,7 @@ class Hello(Response):
 	def __init__(self):
 		super().__init__()
 		with open("assets/triggers/hello.txt") as f:
-			parts = [re.escape(line) for line in f.readlines() if line != ""]
+			parts = [line for line in f.readlines() if line != ""]
 			print(parts)
 			self.REGEX = re.compile(fr"{str.join('|', parts)}", flags=re.IGNORECASE | re.MULTILINE)
 
