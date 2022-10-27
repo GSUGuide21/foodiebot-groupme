@@ -14,9 +14,9 @@ class Test(Command):
 		content = request.content
 
 		soup = BeautifulSoup(content, features="html5lib")
-		divs = soup.select("#event-discovery-list > div:first-child > div")
+		divs = soup.select("#event-discovery-list")
 
-		print(content)
+		print(divs)
 		result = []
 
 		for div in divs:
