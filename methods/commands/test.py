@@ -21,6 +21,7 @@ class Test(Command):
 		for div in divs:
 			result.append(self.parse_event(div))
 		
+		print(result)
 		self.results = result
 		self.limit = 10
 
@@ -58,9 +59,9 @@ class Test(Command):
 	def handle_args(self, query: str | None):
 		if query is None or query != "":
 			return self.limit
-			
-		result = [result for result in self.spaces(result)]
-		limit = int(result[0] if result[0] > 0 else self.limit)
+
+		results = [result for result in self.spaces(query)]
+		limit = int(results[0] if len(results) > 0 and results[0] > 0 else self.limit)
 		return limit
 
 	def response(self, query, message, bot_id, app_id):
