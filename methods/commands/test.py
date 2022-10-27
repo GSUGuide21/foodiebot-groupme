@@ -14,9 +14,10 @@ class Test(Command):
 		content = request.content
 
 		soup = BeautifulSoup(content, features="html5lib")
-		divs = soup.find(id="event-discovery-list")
+		body = soup.body
 
-		print(divs)
+		print(body)
+		"""
 		result = []
 
 		for div in divs:
@@ -24,6 +25,7 @@ class Test(Command):
 
 		self.results = result
 		self.limit = 10
+		"""
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
