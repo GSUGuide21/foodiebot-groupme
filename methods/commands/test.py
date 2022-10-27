@@ -14,15 +14,14 @@ class Test(Command):
 		content = request.content
 
 		soup = BeautifulSoup(content, features="html5lib")
-		divs = soup.select("#event-discovery-list")
+		divs = soup.find(id="event-discovery-list")
 
 		print(divs)
 		result = []
 
 		for div in divs:
 			result.append(self.parse_event(div))
-		
-		print(result)
+
 		self.results = result
 		self.limit = 10
 
