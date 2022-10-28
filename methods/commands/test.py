@@ -17,18 +17,17 @@ class Test(Command):
 		content = request.content
 
 		soup = BeautifulSoup(content, features="html5lib")
-		body = soup.body
+		root = soup.find("div", id="event-discovery-list")
+		divs = root.div.find_all("div")
 
-		print(body)
-		"""
 		result = []
 
 		for div in divs:
 			result.append(self.parse_event(div))
 
+		print(result)
 		self.results = result
 		self.limit = 10
-		"""
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
