@@ -18,7 +18,7 @@ class Test(Command):
 
 		soup = BeautifulSoup(content, features="html5lib")
 		root = soup.find("div", id="event-discovery-list")
-		divs = root.div.find_all("div")
+		divs = root.div.find_all("div", recursive=False)
 
 		result = []
 
