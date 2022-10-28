@@ -48,11 +48,11 @@ class Test(Command):
 		datetime = info.select_one("div:first-child")
 		location = info.select_one("div:last-child")
 
+		print(datetime)
+		
 		datetime = datetime.get_text().strip()
 		location = location.get_text().strip()
 
-		print(datetime)
-		
 		data = {
 			"link": link,
 			"event_id": event_id or "No event ID available",
