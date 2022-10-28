@@ -5,3 +5,4 @@ gunicorn
 pillow
 bs4
 html5lib
+selenium
