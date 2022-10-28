@@ -3,6 +3,8 @@ import re
 import requests
 from .base import Command
 from bs4 import BeautifulSoup, ResultSet, Tag
+from selenium import webdriver
+from ...utils import DRIVER
 
 CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
 
@@ -10,7 +12,8 @@ class Test(Command):
 	EVENT_ID_PATTERN = re.compile(r"(?:https:\/\/gsu\.campuslabs\.com|)\/engage\/event\/(\d+)", flags=re.IGNORECASE)
 
 	def __init__(self):
-		request = requests.get(CAMPUS_LABS_URL)
+		DRIVER.get(CAMPUS_LABS_URL)
+		request = requests.get(DRIVER.page_source)
 		content = request.content
 
 		soup = BeautifulSoup(content, features="html5lib")
