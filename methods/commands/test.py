@@ -45,11 +45,11 @@ class Test(Command):
 
 		info = root.select_one("div:nth-child(3)")
 		
-		datetime = info.select_one("div:first-child")
-		location = info.select_one("div:last-child")
+		datetime = info.div.select_one("div:first-child")
+		location = info.div.select_one("div:last-child")
 
 		print(datetime)
-		
+
 		datetime = datetime.get_text().strip()
 		location = location.get_text().strip()
 
