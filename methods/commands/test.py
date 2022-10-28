@@ -58,6 +58,8 @@ class Test(Command):
 			"location": location
 		}
 
+		print(data)
+
 		return data
 
 	def handle_args(self, query: str | None):
