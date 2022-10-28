@@ -4,7 +4,7 @@ import requests
 from .base import Command
 from bs4 import BeautifulSoup, ResultSet, Tag
 from selenium import webdriver
-from ...utils import DRIVER
+from .. import DRIVER
 
 CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
 
