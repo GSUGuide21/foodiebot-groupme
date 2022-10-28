@@ -95,6 +95,6 @@ class Test(Command):
 		results = self.results[0:limit]
 		result = self.parse_event_string(results)
 		return "Event{plural} found on PIN: \n{event_list}".format(
-			plural="s" if len(result) != 1 else "",
-			event_list=str.join("\n", result)
+			plural="s" if len(results) != 1 else "",
+			event_list=result
 		)
