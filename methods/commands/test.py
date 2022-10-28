@@ -20,6 +20,8 @@ class Test(Command):
 		root = soup.find("div", id="event-discovery-list")
 		divs = root.div.find_all("div", recursive=False)
 
+		print(divs)
+		
 		result = []
 
 		for div in divs:
