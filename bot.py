@@ -68,7 +68,6 @@ def process(message):
 				else:
 					response = current_command.response(query, message, BOT_ID, APP_ID)
 					if response != None:
-						print(response)
 						bot_responses.append(response)
 
 			elif command == "help":
@@ -86,6 +85,19 @@ def process(message):
 					""".format("\n".join(commands_info))
 
 					bot_responses.append(result)
+			
+			else:
+				for key, current_command in commands:
+					if isinstance(current_command.ALIASES, list) and len(current_command.ALIASES) > 0:
+						if command in current_command.ALIASES:
+							if not current_command.has_args(query):
+								bot_responses.append(current_command.ARGUMENT_WARNING)
+						else:
+							response = current_command.response(query, message, BOT_ID, APP_ID)
+							if response != None:
+								bot_responses.append(response)
+						break
+
 		else:
 			for key, value in responses.items():
 				if value.REGEX and value.REGEX.match(message.text):

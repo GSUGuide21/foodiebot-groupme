@@ -1,100 +1,10 @@
-import os
-import re
-import requests
+import os, re, random, time
 from .base import Command
-from bs4 import BeautifulSoup, ResultSet, Tag
-from selenium import webdriver
-from ..driver import DRIVER
-
-CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
-CAMPUS_LABS_EVENT_PATH = "https://gsu.campuslabs.com/engage/event"
 
 class Test(Command):
-	EVENT_ID_PATTERN = re.compile(r"\/engage\/event\/(\d+)", flags=re.IGNORECASE)
-
-	def __init__(self):
-		DRIVER.get(CAMPUS_LABS_URL)
-		content = DRIVER.page_source
-
-		soup = BeautifulSoup(content, features="html5lib")
-		root = soup.find("div", id="event-discovery-list")
-		divs = root.div.find_all("div", recursive=False)
-
-		result = []
-
-		for div in divs:
-			result.append(self.parse_event(div))
-
-		self.results = result
-		self.limit = 3
-		self.min = 1
-		self.max = 6
-
-	def parse_event(self, div: Tag):
-		child = div.find("a", recursive=False)
-		link: str = child.get("href")
-		root = child.select_one(".MuiCard-root")
-		title = child.select_one(".MuiPaper-root h3")
-		title_text: str = title.get_text().strip()
-
-		if re.match(self.EVENT_ID_PATTERN, link):
-			match: re.Match[str] = re.match(self.EVENT_ID_PATTERN, link)
-			event_id: str = match.group(1)
-		else:
-			event_id = None
-
-		info = root.select_one("div:nth-child(3)")
-		
-		datetime = info.div.select_one("div:first-child")
-		location = info.div.select_one("div:last-child")
-
-		datetime: str = datetime.get_text().strip()
-		location: str = location.get_text().strip()
-
-		data = {
-			"link": link,
-			"event_id": event_id or "No event ID available",
-			"title": title_text,
-			"datetime": datetime,
-			"location": location
-		}
-
-		return data
-
-	def parse_event_string(self, events: list[dict[str, str]]):
-		results = []
-
-		for event in events:
-			result = "{title}\nLocation: {location}\nDate and Time: {datetime}\nLink: {link}".format(
-				location=event["location"],
-				title=event["title"],
-				datetime=event["datetime"],
-				link=event["link"]
-			)
-
-			results.append(result)
-
-		return str.join("\n", results)
-
-	def clamp(self, n: int | float):
-		return max(self.min, min(n, self.max))
-
-	def handle_args(self, query: str | None):
-		if query is None or query != "":
-			return self.limit
-
-		results = [result for result in self.spaces(query)]
-		limit = int(results[0] if len(results) > 0 and results[0] > 0 else self.limit)
-		limit: int = self.clamp(limit)
-
-		return limit
-
+	DESCRIPTION = "Tests FoodieBot to check if it is working"
+	
 	def response(self, query, message, bot_id, app_id):
-		print(len(self.results))
-		limit = self.handle_args(query)
-		results = self.results[0:limit]
-		result = self.parse_event_string(results)
-		return "Event{plural} found on PIN: \n{event_list}".format(
-			plural="s" if len(results) != 1 else "",
-			event_list=result
-		)
+		latency = 3
+		time.sleep(latency)
+		return "Test completed in {latency}seconds".format(latency=latency)
