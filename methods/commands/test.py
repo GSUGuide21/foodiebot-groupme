@@ -13,6 +13,8 @@ class Test(Command):
 
 	def __init__(self):
 		DRIVER.get(CAMPUS_LABS_URL)
+		print(DRIVER.page_source)
+		"""
 		request = requests.get(DRIVER.page_source)
 		content = request.content
 
@@ -21,7 +23,7 @@ class Test(Command):
 		divs = root.div.find_all("div", recursive=False)
 
 		print(divs)
-		
+
 		result = []
 
 		for div in divs:
@@ -30,6 +32,7 @@ class Test(Command):
 		print(result)
 		self.results = result
 		self.limit = 10
+		"""
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
