@@ -9,7 +9,7 @@ from ..driver import DRIVER
 CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
 
 class Test(Command):
-	EVENT_ID_PATTERN = re.compile(r"(?:https:\/\/gsu\.campuslabs\.com|)\/engage\/event\/(\d+)", flags=re.IGNORECASE)
+	EVENT_ID_PATTERN = re.compile(r"\/engage\/event\/(\d+)", flags=re.IGNORECASE)
 
 	def __init__(self):
 		DRIVER.get(CAMPUS_LABS_URL)
@@ -39,7 +39,7 @@ class Test(Command):
 
 		if re.match(self.EVENT_ID_PATTERN, link):
 			match: re.Match[str] = re.match(self.EVENT_ID_PATTERN, link)
-			event_id = match.group()
+			event_id = match.group(1)
 		else:
 			event_id = None
 
@@ -51,6 +51,8 @@ class Test(Command):
 		datetime = datetime.get_text().strip()
 		location = location.get_text().strip()
 
+		print(datetime)
+		
 		data = {
 			"link": link,
 			"event_id": event_id or "No event ID available",
