@@ -70,7 +70,7 @@ class Events(Command):
 				location=event["location"],
 				title=event["title"],
 				datetime=event["datetime"],
-				link=event["link"]
+				link="{path}/{id}".format(path=CAMPUS_LABS_EVENT_PATH,id=event["event_id"])
 			)
 
 			results.append(result)
