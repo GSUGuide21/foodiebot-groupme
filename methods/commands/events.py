@@ -17,6 +17,9 @@ class Events(Command):
 	def __init__(self):
 		super().__init__()
 		DRIVER.get(CAMPUS_LABS_URL)
+		self.limit = 3
+		self.min = 1
+		self.max = 6
 		self.generate_events()
 
 	def generate_events(self):
@@ -32,9 +35,6 @@ class Events(Command):
 			result.append(self.parse_event(div))
 
 		self.results = result
-		self.limit = 3
-		self.min = 1
-		self.max = 6
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
@@ -96,6 +96,10 @@ class Events(Command):
 		limit: int = self.clamp(limit)
 
 		return limit
+	
+	def refresh(self):
+		DRIVER.refresh()
+		self.generate_events()
 
 	def response(self, query, message, bot_id, app_id):
 		print(len(self.results))
@@ -103,7 +107,7 @@ class Events(Command):
 		results = self.results[0:limit]
 		result = self.parse_event_string(results)
 		sleep(2)
-		DRIVER.refresh()
+		self.refresh()
 		return "Event{plural} found on PIN: \n{event_list}".format(
 			plural="s" if len(results) != 1 else "",
 			event_list=result
