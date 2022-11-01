@@ -14,6 +14,12 @@ class Events(Command):
 	EVENT_ID_PATTERN = re.compile(r"\/engage\/event\/(\d+)", flags=re.IGNORECASE)
 
 	def __init__(self):
+		super().__init__()
+		self.limit = 3
+		self.min = 1
+		self.max = 6
+
+	def fetch_events(self):
 		DRIVER.get(CAMPUS_LABS_URL)
 		content = DRIVER.page_source
 
@@ -21,15 +27,12 @@ class Events(Command):
 		root = soup.find("div", id="event-discovery-list")
 		divs = root.div.find_all("div", recursive=False)
 
-		result = []
+		results = []
 
 		for div in divs:
-			result.append(self.parse_event(div))
+			results.append(self.parse_event(div))
 
-		self.results = result
-		self.limit = 3
-		self.min = 1
-		self.max = 6
+		return results
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
@@ -44,7 +47,7 @@ class Events(Command):
 		else:
 			event_id = None
 
-		info = root.select_one("div:nth-child(3)")
+		info = root.select_on.e("div:nth-child(3)")
 		
 		datetime = info.div.select_one("div:first-child")
 		location = info.div.select_one("div:last-child")
@@ -85,15 +88,18 @@ class Events(Command):
 			return self.limit
 
 		results = [result for result in self.spaces(query)]
+		print(results)
 		limit = int(results[0] if len(results) > 0 and results[0] > 0 else self.limit)
 		limit: int = self.clamp(limit)
 
 		return limit
 
 	def response(self, query, message, bot_id, app_id):
-		print(len(self.results))
+		found_events = self.fetch_events()
+		print(len(found_events))
 		limit = self.handle_args(query)
-		results = self.results[0:limit]
+		print(limit)
+		results = found_events[0:limit]
 		result = self.parse_event_string(results)
 		return "Event{plural} found on PIN: \n{event_list}".format(
 			plural="s" if len(results) != 1 else "",
