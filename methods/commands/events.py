@@ -4,6 +4,7 @@ import requests
 from .base import Command
 from bs4 import BeautifulSoup, ResultSet, Tag
 from selenium import webdriver
+from time import sleep
 from ..driver import DRIVER
 
 CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
@@ -15,24 +16,25 @@ class Events(Command):
 
 	def __init__(self):
 		super().__init__()
-		self.limit = 3
-		self.min = 1
-		self.max = 6
-
-	def fetch_events(self):
 		DRIVER.get(CAMPUS_LABS_URL)
+		self.generate_events()
+
+	def generate_events(self):
 		content = DRIVER.page_source
 
 		soup = BeautifulSoup(content, features="html5lib")
 		root = soup.find("div", id="event-discovery-list")
 		divs = root.div.find_all("div", recursive=False)
 
-		results = []
+		result = []
 
 		for div in divs:
-			results.append(self.parse_event(div))
+			result.append(self.parse_event(div))
 
-		return results
+		self.results = result
+		self.limit = 3
+		self.min = 1
+		self.max = 6
 
 	def parse_event(self, div: Tag):
 		child = div.find("a", recursive=False)
@@ -47,7 +49,7 @@ class Events(Command):
 		else:
 			event_id = None
 
-		info = root.select_on.e("div:nth-child(3)")
+		info = root.select_one("div:nth-child(3)")
 		
 		datetime = info.div.select_one("div:first-child")
 		location = info.div.select_one("div:last-child")
@@ -87,6 +89,7 @@ class Events(Command):
 		if query is None or query != "":
 			return self.limit
 
+		print(query)
 		results = [result for result in self.spaces(query)]
 		print(results)
 		limit = int(results[0] if len(results) > 0 and results[0] > 0 else self.limit)
@@ -95,12 +98,12 @@ class Events(Command):
 		return limit
 
 	def response(self, query, message, bot_id, app_id):
-		found_events = self.fetch_events()
-		print(len(found_events))
+		print(len(self.results))
 		limit = self.handle_args(query)
-		print(limit)
-		results = found_events[0:limit]
+		results = self.results[0:limit]
 		result = self.parse_event_string(results)
+		sleep(2)
+		DRIVER.refresh()
 		return "Event{plural} found on PIN: \n{event_list}".format(
 			plural="s" if len(results) != 1 else "",
 			event_list=result
