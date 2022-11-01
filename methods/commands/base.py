@@ -98,8 +98,9 @@ class ImageCommand(Command):
 		output = BytesIO()
 		duration = original.info["duration"]
 		frames = [frame.copy() for frame in ImageSequence.Iterator(original)]
-		image = next(frames)
-		image.save(output, format="GIF", append_images=frames, save_all=True, duration=duration/1000.0,loop=1)
+		frames_iter = iter(frames)
+		image = next(frames_iter)
+		image.save(output, format="GIF", append_images=frames_iter, save_all=True, duration=duration/1000.0,loop=1)
 		return self.upload_image(output.getvalue())
 
 	def pil_from_url(self, url):
