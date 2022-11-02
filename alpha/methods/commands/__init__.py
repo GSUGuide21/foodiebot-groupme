@@ -6,3 +6,13 @@ from .herewego import HereWeGo
 from .parrot import Parrot
 from .random import Random
 from .test import Test
+
+commands = {
+	"coin": Coin(),
+	"event": Event(),
+	"events": Events(),
+	"herewego": HereWeGo(),
+	"parrot": Parrot(),
+	"random": Random(),
+	"test": Test()
+}

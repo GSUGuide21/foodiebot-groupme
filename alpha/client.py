@@ -9,7 +9,7 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from methods import commands, system, responses
-from utils import Message, SenderType
+from util import Message, SenderType
 
 class FoodieBot:
 	def __init__(self, **config):
