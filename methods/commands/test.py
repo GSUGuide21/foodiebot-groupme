@@ -9,7 +9,7 @@ class Test(Command):
 	API_ENDPOINT = "https://api.groupme.com/v3/groups"
 	
 	def response(self, query, message, bot_id, app_id):
-		response = requests.get(f"{self.API_ENDPOINT}/{self.GROUP_ID}").json()["response"]
+		response = requests.get(f"{self.API_ENDPOINT}/{self.GROUP_ID}?token={self.ACCESS_TOKEN}").json()["response"]
 		print(response)
 		time.sleep(self.LATENCY)
 		return "Test completed!"
