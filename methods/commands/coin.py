@@ -1,38 +1,27 @@
-import random
+from random import choice
 from .base import Command
 
 class Coin(Command):
 	DESCRIPTION = "Flips a coin!"
 	ALIASES = ["flip", "coinflip"]
 	COINS = ["heads", "tails"]
-
-	def has_args(self, query):
-		return len(self.spaces(query)) >= self.MINIMUM_ARGUMENTS
-
-	def handle_args(self, query: str | None=""):
-		if query is None or query == "":
-			return query
-		
-		parts = self.spaces(query)
-		display = parts[0]
-
-		return display.lower()
 	
-	def response(self, query, message, bot_id, app_id):
-		display = self.handle_args(query)
-		result = random.choice(self.COINS)
+	ARGUMENT_TYPE = "string"
+	CATEGORY = "Event"
 
-		if display is not "" or display is not None:
-			match display:
-				case "upper":
-					result = result.upper()
-				case "lower":
-					result = result.lower()
-				case "fl":
-					result = result[0].upper()
-				case "flupper":
-					result = result[0].upper()
-				case "fllower":
-					result = result[0].lower()
-	
+	def respond(self, **options):
+		query = options.get("query", "")
+		display = self.parse_arguments(query)
+		coin = choice(self.coins)
+
+		displays = {
+			"upper": lambda r: r.upper(),
+			"lower": lambda r: r.lower(),
+			"fl": lambda r: r[0],
+			"flupper": lambda r: r[0].upper(),
+			"fllower": lambda r: r[0].lower()
+		}
+
+		result = displays[display](coin) if display in displays else coin
+
 		return f"FoodieBot has flipped a coin! It landed on {result}"

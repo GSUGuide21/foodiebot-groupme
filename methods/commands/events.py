@@ -1,43 +1,32 @@
-import os
-import re
-import requests
+import os, re, requests
 from .base import Command
 from bs4 import BeautifulSoup, ResultSet, Tag
-from selenium import webdriver
 from time import sleep
-from ..driver import DRIVER
-
-CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
-CAMPUS_LABS_EVENT_PATH = "https://gsu.campuslabs.com/engage/event"
+from ..driver import driver
 
 class Events(Command):
+	CAMPUS_LABS_URL = "https://gsu.campuslabs.com/engage/events?perks=FreeFood"
+	CAMPUS_LABS_EVENT_PATH = "https://gsu.campuslabs.com/engage/event"
 	DESCRIPTION = "Posts a list of events to the chat"
 	EVENT_ID_PATTERN = re.compile(r"\/engage\/event\/(\d+)", flags=re.IGNORECASE)
+	CATEGORY = "Event"
+	ARGUMENT_TYPE = "spaces"
 
-	def __init__(self):
-		super().__init__()
-		DRIVER.get(CAMPUS_LABS_URL)
-		self.limit = 3
-		self.min = 1
-		self.max = 6
-		self.generate_events()
+	def __init__(self, **options):
+		self.limit = options.get("limit", 3)
+		self.min = options.get("min", 1)
+		self.max = options.get("max", 7)
 
-	def generate_events(self):
-		content = DRIVER.page_source
-
-		soup = BeautifulSoup(content, features="html5lib")
+	def generate_events(self, source):
+		soup = BeautifulSoup(source, features="html5lib")
 		root = soup.find("div", id="event-discovery-list")
-		divs = root.div.find_all("div", recursive=False)
+		elements = root.div.find_all("div", recursive=False)
 
-		result = []
+		results = [self.parse_event(div) for div in elements]
+		return results
 
-		for div in divs:
-			result.append(self.parse_event(div))
-
-		self.results = result
-
-	def parse_event(self, div: Tag):
-		child = div.find("a", recursive=False)
+	def parse_event(self, element):
+		child = element.find("a", recursive=False)
 		link: str = child.get("href")
 		root = child.select_one(".MuiCard-root")
 		title = child.select_one(".MuiPaper-root h3")
@@ -75,7 +64,7 @@ class Events(Command):
 				location=event["location"],
 				title=event["title"],
 				datetime=event["datetime"],
-				link="{path}/{id}".format(path=CAMPUS_LABS_EVENT_PATH,id=event["event_id"])
+				link="{path}/{id}".format(path=self.CAMPUS_LABS_EVENT_PATH,id=event["event_id"])
 			)
 
 			results.append(result)
@@ -85,30 +74,23 @@ class Events(Command):
 	def clamp(self, n: int | float):
 		return max(self.min, min(n, self.max))
 
-	def handle_args(self, query: str | None):
-		if query is None or query != "":
-			return self.limit
+	def respond(self, **options):
+		driver.get(self.CAMPUS_LABS_URL)
+		sleep(3)
 
-		print(query)
-		results = [result for result in self.spaces(query)]
-		print(results)
-		limit = int(results[0] if len(results) > 0 and results[0] > 0 else self.limit)
-		limit: int = self.clamp(limit)
+		limit = self.parse_arguments(options.get("query", ""))
+		limit: list = limit.result
 
-		return limit
-	
-	def refresh(self):
-		DRIVER.refresh()
-		self.generate_events()
+		if not len(limit):
+			limit = self.limit
+		else:
+			limit = self.clamp(int(limit[0]))
 
-	def response(self, query, message, bot_id, app_id):
-		print(len(self.results))
-		limit = self.handle_args(query)
-		results = self.results[0:limit]
-		result = self.parse_event_string(results)
-		sleep(2)
-		self.refresh()
+		results = self.generate_events(driver.page_source)
+		results = results[0:limit]
+		driver.close()
+
 		return "Event{plural} found on PIN: \n{event_list}".format(
 			plural="s" if len(results) != 1 else "",
-			event_list=result
+			event_list=self.parse_event_string(results)
 		)

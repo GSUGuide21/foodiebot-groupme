@@ -9,7 +9,7 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from methods import commands, system, responses
-from util import Message, SenderType
+from util import Message, SenderType, Group
 
 class FoodieBot:
 	def __init__(self, **config):
@@ -21,15 +21,17 @@ class FoodieBot:
 		self.API_ENDPOINT = "https://api.groupme.com/v3/bots"
 	
 	def reply(self, message, group_id):
-		result = self.process(Message(message))
+		result = self.process(Message(message), group_id)
 		self.send(result, group_id)
 
-	def process(self, message):
+	def process(self, message, group_id):
 		bot_responses = []
 		username = message.name
+		group = Group(group_id).fetch()
 
 		print(f"Sender name: {username}")
 		print(f"Sender type: {message.sender_type}")
+		print(f"{group.get_owner().nick or 'Test'}")
 
 		if message.sender_type == SenderType.User:
 			if message.text.startswith(self.PREFIX):
@@ -42,7 +44,11 @@ class FoodieBot:
 			
 				response = self.init_command(
 					message=message, command=command,
-					query=query, username=username
+					query=query, username=username,
+					group=group,
+					bot_id=self.BOT_ID,
+					app_id=self.APP_ID,
+					client=self
 				)
 
 				if response != None:
@@ -52,7 +58,7 @@ class FoodieBot:
 				for key, response in responses.items():
 					if response.REGEX and response.REGEX.match(message.text):
 						matches = response.REGEX.findall(message.text)
-						result = response.respond(message, matches)
+						result = response.respond(message, matches, group)
 						bot_responses.append(result)
 
 		if message.sender_type == SenderType.System:
@@ -60,7 +66,7 @@ class FoodieBot:
 				sys_cmd = system[option]
 				if sys_cmd.REGEX and sys_cmd.REGEX.match(message.text):
 					matches = sys_cmd.REGEX.findall(message.text)
-					bot_responses.append(sys_cmd.respond(message, matches))
+					bot_responses.append(sys_cmd.respond(message, matches, group))
 
 		return bot_responses
 
@@ -83,10 +89,7 @@ class FoodieBot:
 		return "---Help---\n{info}".format(info="\n".join(cmds_info))
 
 	def init_command(self, **options):
-		message = options["message"]
 		command = options["command"]
-		query = options["query"]
-		username = options["username"]
 
 		if command == "help":
 			if query:
@@ -128,10 +131,12 @@ class FoodieBot:
 			
 		elif command in commands:
 			cmd = commands[command]
+			if callable(cmd.precondition) and cmd.precondition(**options):
+				return cmd.PRECONDITION_WARNING
 			if not cmd.has_args(query):
 				return cmd.ARGUMENT_WARNING
 			else:
-				response = cmd.respond(query, message, self.BOT_ID, self.APP_ID)
+				response = cmd.respond(**options)
 				return response
 
 	def send(self, message, group_id):

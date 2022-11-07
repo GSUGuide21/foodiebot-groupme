@@ -1,16 +1,18 @@
 from .base import Command
 from .coin import Coin
+from .event import Event
+from .events import Events
 from .herewego import HereWeGo
 from .parrot import Parrot
 from .random import Random
-from .events import Events
 from .test import Test
 
 commands = {
 	"coin": Coin(),
-	"herewego": HereWeGo(),
-	"random": Random(),
+	"event": Event(),
 	"events": Events(),
-	"test": Test(),
-	"parrot": Parrot()
+	"herewego": HereWeGo(),
+	"parrot": Parrot(),
+	"random": Random(),
+	"test": Test()
 }

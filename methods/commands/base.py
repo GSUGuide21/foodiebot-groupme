@@ -1,37 +1,26 @@
-import os
-import re
-import requests
-import random
+import os, re, requests, random
+from util import Group
 from io import BytesIO
 from PIL import Image, ExifTags, ImageSequence
+from util import Argument, arguments, preconditions
 
 API_URL = "https://api.groupme.com/v3/groups"
 IMAGE_URL = "https://image.groupme.com/pictures"
 
 class Command:
-	DESCRIPTION = "No description."
+	DESCRIPTION = "No description included"
 	MINIMUM_ARGUMENTS = 0
-	ARGUMENT_WARNING = "Not enough arguments provided! Please add more after the command."
+	PRECONDITIONS = []
 	ACCESS_TOKEN = os.environ.get("access_token")
 	ALIASES = []
+	CATEGORY = "None"
+	ARGUMENT_TYPE = "string"
 
 	def __init__(self):
-		print(f"Command loaded {self.__class__.__name__}")
-	
+		print(f"Command ({self.__class__.__name__}) loaded!")
+
 	def wave(self):
 		return "👋" + random.choice("🏻🏼🏽🏾🏿")
-	
-	def has_args(self, query):
-		return len(self.spaces(query)) >= self.MINIMUM_ARGUMENTS
-
-	def handle_args(self, result):
-		return result
-
-	def spaces(self, query):
-		return [line for line in re.split(r"\s+", query) if line != ""]
-
-	def lines(self, query):
-		return [line for line in query.split("\n") if line != ""]
 
 	def bullet(self, pairs, embellish_first=False) -> str:
 		response = ""
@@ -44,6 +33,13 @@ class Command:
 			if value:
 				response += f"{title}: {value}\n"
 		return response
+
+	def parse_arguments(self, query):
+		arg_type = self.ARGUMENT_TYPE.lower()
+		arg_type = arg_type	if arg_type in arguments else "string"
+
+		arg: Argument = arguments[arg_type]()
+		return arg.run()
 	
 	@staticmethod
 	def safe_spaces(text):
@@ -53,7 +49,7 @@ class Command:
 	def normalize(self, text):
 		return text.lower().replace(" ", "")
 
-	def response(self, query, message, bot_id, app_id):
+	def response(self, **options):
 		pass
 
 class ImageCommand(Command):
@@ -65,7 +61,7 @@ class ImageCommand(Command):
 
 		r = requests.post(IMAGE_URL, data=data, headers=headers)
 		return r.json()["payload"]["url"]
-	
+
 	def rotate_upright(self, image: Image):
 		try:
 			for orientation in ExifTags.TAGS.keys():
@@ -93,14 +89,14 @@ class ImageCommand(Command):
 		output = BytesIO()
 		image.save(output, format=image_format, mode="RGB")
 		return self.upload_image(output.getvalue())
-	
+
 	def upload_gif_image(self, original: Image):
 		output = BytesIO()
 		duration = original.info["duration"]
 		frames = [frame.copy() for frame in ImageSequence.Iterator(original)]
 		frames_iter = iter(frames)
 		image = next(frames_iter)
-		image.save(output, format="GIF", append_images=frames_iter, save_all=True, duration=duration/1000.0,loop=1)
+		image.save(output, format="GIF", append_images=frames_iter, duration=duration/1500.0, loop=1, mode="RGB")
 		return self.upload_image(output.getvalue())
 
 	def pil_from_url(self, url):
@@ -125,11 +121,10 @@ class ImageCommand(Command):
 			image = self.resize(image, max_width)
 		return image
 
-	def get_portrait(self, user_id, group_id):
-		members = requests.get(f"{API_URL}/${group_id}?token=${self.ACCESS_TOKEN}").json()["response"]["members"]
-		for member in members:
-			if member["user_id"] == user_id:
-				return member["image_url"]
+	def get_portrait(self, user_id, group: Group):
+		member = group.fetch().find_member(user_id)
+		if member["image_url"]:
+			return member["avatar_url"]
 
 	def get_source_url(self, message, include_avatar=True):
 		mention_attachments = [attachment for attachment in message.raw["attachments"] if attachment["type"] == "mentions"]

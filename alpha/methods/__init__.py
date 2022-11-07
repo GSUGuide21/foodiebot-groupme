@@ -1,3 +1,3 @@
-from .commands import commands
-from .system import system
-from .responses import responses
+from .commands import commands, Command
+from .system import system, SystemCommand
+from .responses import responses, Response

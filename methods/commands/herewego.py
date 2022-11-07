@@ -6,10 +6,8 @@ cwd = os.getcwd()
 
 class HereWeGo(ImageCommand):
 	DESCRIPTION = 'Sends an "Ah shit, here we go again" meme'
+	CATEGORY = "Image"
 
-	def has_args(self, query):
-		return True
-
-	def response(self, query, message, bot_id, app_id):
+	def respond(self, **options):
 		image = Image.open("assets/images/herewego.gif")
 		return "", self.upload_gif_image(image)
