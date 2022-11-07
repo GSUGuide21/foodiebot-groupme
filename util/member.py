@@ -1,8 +1,7 @@
 import os, time, requests
-from .group import Group
 
 class Member:
-	def __init__(self, user, group: Group):
+	def __init__(self, user, group):
 		self.group = group
 		self.nick: str = user["nickname"]
 		self.name: str = user["name"]
