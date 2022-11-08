@@ -13,9 +13,9 @@ from util import Message, SenderType, Group
 
 class FoodieBot:
 	def __init__(self, **config):
-		self.BOT_ID = os.environ.get("bot_id", config.bot_id)
-		self.APP_ID = os.environ.get("app_id", config.app_id)
-		self.PREFIX = os.environ.get("bot_prefix", config.bot_prefix)
+		self.BOT_ID = os.environ.get("bot_id", config.get("bot_id", ""))
+		self.APP_ID = os.environ.get("app_id", config.get("app_id", ""))
+		self.PREFIX = os.environ.get("bot_prefix", config.get("bot_prefix", ""))
 		self.MAX_MESSAGE_LENGTH = os.environ.get("max_message_length", 1000)
 
 		self.API_ENDPOINT = "https://api.groupme.com/v3/bots"
