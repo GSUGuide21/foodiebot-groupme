@@ -53,6 +53,7 @@ class Group:
 		for member in self.members.values():
 			if member.is_owner:
 				return member
+
 		return None
 
 	def get_admins(self):
@@ -60,4 +61,16 @@ class Group:
 		for member in self.members.values():
 			if member.is_admin:
 				admins.append(member)
+
 		return admins
+
+	def get_member_by_name(self, nick: str):
+		for member in self.members.values():
+			if member.nick == nick:
+				return member
+			
+		return None
+
+	def get_members_by_names(self, nicks: list[str]):
+		members = [self.get_member_by_name(nick) for nick in nicks]
+		return members
