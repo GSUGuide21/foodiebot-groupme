@@ -180,7 +180,7 @@ class FoodieBot:
 			response = requests.post(f"{self.API_ENDPOINT}/post", json=data)
 
 app = Flask(__name__)
-client = FoodieBot()
+client = FoodieBot(bot_prefix="$")
 
 @app.route("/", methods=["POST"])
 def receive():
