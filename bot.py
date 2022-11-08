@@ -91,6 +91,11 @@ class FoodieBot:
 	def init_command(self, **options):
 		command = options["command"]
 
+		print(command)
+
+		if command == "":
+			return ""
+
 		if command == "help":
 			if query:
 				query = query.strip(self.PREFIX).lower()
