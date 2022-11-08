@@ -31,7 +31,7 @@ class FoodieBot:
 
 		print(f"Sender name: {username}")
 		print(f"Sender type: {message.sender_type}")
-		print(f"{group.get_owner().nick or 'Test'}")
+		print(f"{', '.join([admin.nick for admin in group.get_admins()])}")
 
 		if message.sender_type == SenderType.User:
 			if message.text.startswith(self.PREFIX):
