@@ -21,7 +21,10 @@ class SplitArgument(Argument):
 
 		return str.split(string, self.delimiter)
 
-	def run(self, **options):
+	def ok(self, **options):
+		if not self.validate(**options):
+			return self.ARGUMENT_WARNING
+			
 		query: str = options.get("query", "")
 		parts = str.split(query, self.delimiter)
 		self.result = parts

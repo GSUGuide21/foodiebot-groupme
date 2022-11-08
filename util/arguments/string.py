@@ -7,7 +7,7 @@ class StringArgument(Argument):
 	def __repr__(self):
 		return self.result
 
-	def run(self, **options):
+	def ok(self, **options):
 		query = options.get("query", "")
 		self.result = str(query)
 		return self

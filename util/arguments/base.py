@@ -7,5 +7,12 @@ class Argument:
 	def validate(self, **options):
 		return True
 
-	def run(self, **options):
+	def ok(self, **options):
 		return self
+	
+	def error(self, **options):
+		self.result = self.ARGUMENT_WARNING
+		return self
+
+	def run(self, **options):
+		return self.ok(**options) if self.validate(**options) else self.error(**options)
