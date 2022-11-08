@@ -34,6 +34,9 @@ class Command:
 				response += f"{title}: {value}\n"
 		return response
 
+	def precondition(self, **options):
+		pass
+
 	def parse_arguments(self, query):
 		arg_type = self.ARGUMENT_TYPE.lower()
 		arg_type = arg_type	if arg_type in arguments else "string"

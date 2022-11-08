@@ -90,8 +90,7 @@ class FoodieBot:
 
 	def init_command(self, **options):
 		command = options["command"]
-
-		print(command)
+		query = options.get("query", "")
 
 		if command == "":
 			return ""
