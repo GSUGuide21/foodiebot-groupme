@@ -12,7 +12,7 @@ class Coin(Command):
 	def respond(self, **options):
 		query = options.get("query", "")
 		display = self.parse_arguments(query)
-		coin = choice(self.coins)
+		coin = choice(self.COINS)
 
 		displays = {
 			"upper": lambda r: r.upper(),
