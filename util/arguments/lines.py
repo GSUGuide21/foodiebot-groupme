@@ -1,4 +1,5 @@
 from .split import SplitArgument
+from methods.commands import Command
 
 class LinesArgument(SplitArgument):
 	def __init__(self, **options):

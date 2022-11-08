@@ -137,8 +137,6 @@ class FoodieBot:
 			cmd = commands[command]
 			if callable(cmd.precondition) and cmd.precondition(**options):
 				return cmd.PRECONDITION_WARNING
-			if not cmd.has_args(query):
-				return cmd.ARGUMENT_WARNING
 			else:
 				response = cmd.respond(**options)
 				return response

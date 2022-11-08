@@ -52,6 +52,9 @@ class Command:
 	def normalize(self, text):
 		return text.lower().replace(" ", "")
 
+	def run(self, **options):
+		pass
+	
 	def response(self, **options):
 		pass
 

@@ -10,7 +10,7 @@ class Argument:
 		self.initial_value = self.query
 		self.value = self.query
 
-	def validate(self):
+	def validate(self, **options):
 		return True
 
 	def run(self, **options):
