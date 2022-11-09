@@ -3,9 +3,9 @@ from .sender_type import SenderType
 
 class Message:
 	def __init__(self, raw={}, text=None):
-		self.raw = raw or {"attachments": []}
-		self.text = text or raw.get("text")
-		self.user_id = raw.get("user_id")
+		self.raw: dict = raw or {"attachments": []}
+		self.text: str = text or raw.get("text")
+		self.user_id: str = raw.get("user_id")
 
 		time = raw.get("created_at", datetime.now())
 

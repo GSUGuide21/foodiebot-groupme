@@ -9,88 +9,100 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from methods import commands, system, responses
-from util import Message, SenderType, Group
+from util import Message, SenderType, Group, Member
 
 class FoodieBot:
 	def __init__(self, **config):
-		self.BOT_ID = os.environ.get("bot_id", config.get("bot_id", ""))
-		self.APP_ID = os.environ.get("app_id", config.get("app_id", ""))
-		self.PREFIX = os.environ.get("bot_prefix", config.get("bot_prefix", ""))
-		self.MAX_MESSAGE_LENGTH = os.environ.get("max_message_length", 1000)
+		self.BOT_ID = config.get("bot_id", os.environ.get("bot_id", ""))
+		self.APP_ID = config.get("app_id", os.environ.get("app_id", ""))
+		self.PREFIX = config.get("bot_prefix", os.environ.get("bot_prefix", ""))
+		self.MAX_MESSAGE_LENGTH = config.get("max_message_length", os.environ.get("max_message_length", 1000))
+		self.ACCESS_TOKEN = config.get("access_token", os.environ.get("access_token", ""))
 
-		self.API_ENDPOINT = "https://api.groupme.com/v3/bots"
-	
+		self.BOT_ENDPOINT = "https://api.groupme.com/v3/bots"
+		self.GROUPS_ENDPOINT = "https://api.groupme.com/v3/groups"
+
 	def reply(self, message, group_id):
-		result = self.process(Message(message), group_id)
-		self.send(result, group_id)
+		result = self.process(message=message, group_id=group_id)
+		self.send(result=result, group_id=group_id)
 
-	def process(self, message, group_id):
-		bot_responses = []
-		username = message.name
+	def process(self, **options):
+		responses = []
+		message = options.get("message", "")
+		group_id = options.get("group_id", None)
+
+		if message == "" or group_id == "":
+			return responses
+
+		message = Message(message)
 		group = Group(group_id).fetch()
+		sender = group.find_member(message.user_id)
 
-		print(f"Sender name: {username}")
-		print(f"Sender type: {message.sender_type}")
-		print(f"{', '.join([admin.nick for admin in group.get_admins()])}")
+		print(f"Owner: {group.owner.nick} ({group.owner.id})")
+		print(f"Sender: {sender.nick} ({sender.id})")
 
 		if message.sender_type == SenderType.User:
 			if message.text.startswith(self.PREFIX):
-				parts: list[str] = message.text[len(self.PREFIX):].strip().split(None, 1)
-				command = parts.pop(0).lower()
-				query = parts[0] if len(parts) > 0 else ""
-
-				if self.PREFIX in command:
-					pass
-			
-				response = self.init_command(
-					message=message, command=command,
-					query=query, username=username,
+				response = self.parse_command(
+					message=message, 
+					sender=sender,
 					group=group,
-					bot_id=self.BOT_ID,
-					app_id=self.APP_ID,
 					client=self
 				)
-
 				if response != None:
-					bot_responses.append(response)
-			
+					responses.append(response)
 			else:
-				for key, response in responses.items():
-					if response.REGEX and response.REGEX.match(message.text):
-						matches = response.REGEX.findall(message.text)
-						result = response.respond(message, matches, group)
-						bot_responses.append(result)
+				response = self.parse_response(
+					message=message,
+					sender=sender,
+					group=group,
+					client=self
+				)
+				if response != None:
+					responses.append(response)
 
 		if message.sender_type == SenderType.System:
-			for option in system:
-				sys_cmd = system[option]
-				if sys_cmd.REGEX and sys_cmd.REGEX.match(message.text):
-					matches = sys_cmd.REGEX.findall(message.text)
-					bot_responses.append(sys_cmd.respond(message, matches, group))
-
-		return bot_responses
-
-	def render_help(self):
-		cmds_info = []
-
-		for command in commands:
-			cmd = commands[command]
-			has_aliases = isinstance(cmd.ALIASES, list) and len(cmd.ALIASES) > 0
-			aliases_str = ", ".join(cmd.ALIASES) if has_aliases else ""
-
-			res = "{prefix}{command}: {description}{aliases}".format(
-				prefix=self.PREFIX, command=command,
-				description=cmd.DESCRIPTION,
-				aliases=aliases_str
+			response = self.parse_sys(
+				message=message,
+				group=group,
+				client=self
 			)
+			if response != None:
+				responses.append(response)
 
-			cmds_info.append(res)
+		return responses
 
-		return "---Help---\n{info}".format(info="\n".join(cmds_info))
+	def parse_command(self, **options):
+		message = options.get("message", None)
+		sender = options.get("sender", None)
+		
+		if message is None:
+			return None
+		
+		parts = message.text[len(self.PREFIX):].strip().split(None, 1)
+		command = parts.pop(0).lower()
+		query = parts[0] if len(parts) > 0 else ""
+
+		if self.PREFIX in command:
+			return None
+
+		return self.init_command(
+			message=message,
+			command=command,
+			query=query,
+			bot_id=self.BOT_ID,
+			app_id=self.APP_ID,
+			sender=sender,
+			client=self
+		)
 
 	def init_command(self, **options):
-		command = options["command"]
+		command = options.get("command")
 		query = options.get("query", "")
+		sender: Member = options.get("sender")
+		message = options.get("message")
+		bot_id = options.get("bot_id")
+		app_id = options.get("app_id")
 
 		if command == "":
 			return ""
@@ -98,53 +110,134 @@ class FoodieBot:
 		if command == "help":
 			if query:
 				query = query.strip(self.PREFIX).lower()
-
-				if query in commands:
-					description = commands[query].DESCRIPTION
-					aliases = commands[query].ALIASES
-
-					aliases_str = "\nAliases: {result}".format(
-						result=str.join(", ", aliases)
-					) if isinstance(aliases, list) and len(aliases) > 0 else ""
-					
-					return "{prefix}{query}: {description}{aliases}".format(
-						prefix=self.PREFIX, description=description,
-						query=query, aliases=aliases_str
-					)
-
-				else:
-					for key, cmd in commands:
-						if isinstance(cmd.ALIASES, list) and len(cmd.ALIASES) > 0:
-							if query in cmd.ALIASES:
-								description = commands[key].DESCRIPTION
-								aliases = commands[key].ALIASES
-
-								aliases_str = "\nAliases: {result}".format(
-									result=str.join(", ", aliases)
-								) if isinstance(aliases, list) and len(aliases) > 0 else ""
-					
-								return "{prefix}{query}: {description}{aliases}".format(
-									prefix=self.PREFIX, description=description,
-									query=query, aliases=aliases_str
-								)
-
-					return f"The command ({query}) does not exist! Please view the available commands by using $help."													
-
+				return self.render_help_by_command(command=query)
 			else:
 				return self.render_help()
-			
-		elif command in commands:
-			cmd = commands[command]
-			if callable(cmd.precondition) and cmd.precondition(**options):
-				return cmd.PRECONDITION_WARNING
-			else:
-				response = cmd.respond(**options)
-				return response
 
-	def send(self, message, group_id):
+		if command in commands:
+			cmd = commands[command]
+			response = cmd.respond(**options)
+			return response
+
+		for key, cmd in commands.items():
+			if isinstance(cmd.ALIASES, list) and len(cmd.ALIASES) > 0:
+				if command in cmd.ALIASES:
+					return self.init_command(
+						command=key,
+						message=message,
+						query=query,
+						bot_id=bot_id,
+						app_id=app_id,
+						sender=sender,
+						client=self
+					)
+
+		return "Command ({command}) is not available to you at this moment. Come back later".format(command=command)
+
+	def render_help(self):
+		cmds_info: dict[str, list] = {}
+
+		for key, command in commands.items():
+			description = command.DESCRIPTION
+			aliases = command.ALIASES
+			category = command.CATEGORY
+
+			cmds_info[category] = cmds_info.get(category, [])
+
+			result = self.render_help_item(
+				description=description, 
+				aliases=aliases,
+				command=key
+			)
+
+			cmds_info[category].append(result)
+
+		response = []
+		for category, commands in cmds_info.items():
+			cmd_str = ":{category}:\n{commands}".format(
+				category=category,
+				commands="\n".join(commands)
+			)
+			response.append(cmd_str)
+
+		return "---Help---\n{info}".format(info="\n".join(response))
+
+	def render_help_item(self, **options):
+		command = options.get('command')
+		description = options.get('description')
+		aliases = options.get('aliases')
+
+		aliases_l = str.join(", ", aliases) if isinstance(aliases, list) and len(aliases) > 0 else ""
+		aliases_s = "(aliases: {result})".format(result=aliases_l) if aliases_l != "" else ""
+
+		return "{prefix}{command}: {description} {aliases}".format(
+			prefix=self.PREFIX,
+			description=description,
+			aliases=aliases_s,
+			command=command			
+		)
+
+	def render_help_by_command(self, **options):
+		command = options.get("command")
+
+		if command in commands:
+			description = commands[command].DESCRIPTION
+			aliases = commands[command].ALIASES
+			category = commands[command].CATEGORY
+
+			aliases_l = str.join(", ", aliases) if isinstance(aliases, list) and len(aliases) > 0 else ""
+			aliases_s = "\nAliases: {result}".format(result=aliases_l) if aliases_l != "" else ""
+
+			category_s = "\nCategory: {category}".format(category=category) if category != "" else ""
+
+			return "{prefix}{command}: {description}{category}{aliases}".format(
+				prefix=self.PREFIX,
+				description=description,
+				command=command,
+				aliases=aliases_s,
+				category=category_s
+			)
+		else:
+			for key, cmd in commands.items():
+				if isinstance(cmd.ALIASES, list) and len(cmd.ALIASES) > 0:
+					if command in cmd.ALIASES:
+						return self.render_help_by_command(command=key)
+
+		return f"The command ({command}) does not exist! Please view the available commands by using $help."
+
+	def parse_response(self, **options):
+		for response in responses.values():
+			if callable(response.validate) and response.validate(**options):
+				return response.respond(**options)
+
+	def parse_sys(self, **options):
+		for sys_cmd in system.values():
+			if callable(sys_cmd.validate) and sys_cmd.validate(**options):
+				return sys_cmd.respond(**options)
+
+	def remove(self, **options):
+		sender: Member | None = options.get("sender")
+		group: Group = options.get("group")
+		
+		if sender is None:
+			return False
+
+		members_url = f"{self.GROUPS_ENDPOINT}/{group.group_id}/members"
+		url = f"{members_url}/{sender.id}/remove"
+
+		headers = {
+			"X-Access-Token": self.ACCESS_TOKEN
+		}
+
+		response = requests.post(url, headers=headers)
+
+	def send(self, **options):
+		message = options.get("result")
+		group_id = options.get("group_id")
+
 		if isinstance(message, list):
 			for item in message:
-				self.send(item, group_id)
+				self.send(result=item, group_id=group_id)
 			return
 
 		data = {
@@ -152,6 +245,7 @@ class FoodieBot:
 		}
 
 		image = None
+
 		if isinstance(message, tuple):
 			message, image = message
 
@@ -160,21 +254,22 @@ class FoodieBot:
 
 		if len(message) > self.MAX_MESSAGE_LENGTH:
 			for block in [message[i:i + self.MAX_MESSAGE_LENGTH] for i in range(0, len(message), self.MAX_MESSAGE_LENGTH)]:
-				self.send(block, group_id)
+				self.send(result=block, group_id=group_id)
 				time.sleep(0.3)
 
 			data["text"] = ""
 		else:
 			data["text"] = message
 
-		if image is not None:
+		if image != None:
 			data["picture_url"] = image
-		
+
 		print("Issuing responses:")
 		print(data)
 
 		if data["text"] or data.get("picture_url"):
-			response = requests.post(f"{self.API_ENDPOINT}/post", json=data)
+			response = requests.post(f"{self.BOT_ENDPOINT}/post", json=data)		
+
 
 app = Flask(__name__)
 client = FoodieBot(bot_prefix="$")
