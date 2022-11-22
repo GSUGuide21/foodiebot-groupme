@@ -40,7 +40,7 @@ class FoodieBot(Manager):
 
 		responses = []
 		message = Message(message)
-		group = Group(group_id).fetch()
+		group = Group(group_id=group_id).fetch()
 		sender = group.find_member(message.user_id)
 
 		params = {
