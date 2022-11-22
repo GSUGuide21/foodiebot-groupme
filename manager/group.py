@@ -5,7 +5,7 @@ from .member import *
 
 class Group(Manager):
 	def __init__(self, **options):
-		super(Group, self).__init__(path=f"/groups/{options.get('group_id')}")
+		super(Group, self).__init__(path=f"groups/{options.get('group_id')}")
 		self.access_token = os.environ.get("access_token")
 		self.group_id = options.get("group_id")
 
