@@ -15,6 +15,9 @@ class Member(Manager):
 		self.muted: bool = user["muted"]
 		self.avatar_url: str = user["image_url"]
 
+	def __repr__(self):
+		return f"{self.nick} ({self.user_id})"
+
 	def has_role(self, role: str):
 		return role in self.roles
 

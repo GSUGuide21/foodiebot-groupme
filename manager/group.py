@@ -13,7 +13,7 @@ class Group(Manager):
 		self.coowners: dict[str, Member] = {}
 		self.admins: dict[str, Member] = {}
 		self.owner = None
-		
+
 	def __repr__(self):
 		return f"{self.name} ({self.group_id})"
 
@@ -48,7 +48,6 @@ class Group(Manager):
 
 	def find_member(self, user_id):
 		for member in self.members.values():
-			print(member)
 			if member["user_id"] == user_id:
 				return member
 

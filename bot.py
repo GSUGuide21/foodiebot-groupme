@@ -78,8 +78,6 @@ class FoodieBot(Manager):
 		command = parts.pop(0).lower()
 		query = parts[0] if len(parts) > 0 else ""
 
-		print(query)
-
 		if self.prefix in command: return None
 
 		params = {
