@@ -41,9 +41,9 @@ class Group(Manager):
 	def generate_users(self, members):
 		for member in members:
 			self.members[member["user_id"]] = Member(member, self)
-			if "owner" in self.member[member["user_id"]].roles:
+			if "owner" in self.members[member["user_id"]].roles:
 				self.owner = self.members[member["user_id"]]
-			elif "admin" in self.member[member["user_id"]].roles:
+			elif "admin" in self.members[member["user_id"]].roles:
 				self.admins[member["user_id"]] = self.members[member["user_id"]]
 
 	def find_member(self, user_id):
