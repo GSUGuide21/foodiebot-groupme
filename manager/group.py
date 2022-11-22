@@ -48,7 +48,7 @@ class Group(Manager):
 
 	def find_member(self, user_id):
 		for member in self.members.values():
-			print(json.dumps(member))
+			print(member)
 			if member["user_id"] == user_id:
 				return member
 
