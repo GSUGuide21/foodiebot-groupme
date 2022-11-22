@@ -1,4 +1,4 @@
-import os, re, requests
+import os, re, json, requests
 from time import sleep
 from .base import *
 from .member import *
@@ -48,6 +48,7 @@ class Group(Manager):
 
 	def find_member(self, user_id):
 		for member in self.members.values():
+			print(json.dumps(member))
 			if member["user_id"] == user_id:
 				return member
 
