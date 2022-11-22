@@ -1,5 +1,5 @@
 from .base import Precondition
-from ..group import Group
+from manager import Group
 
 class AdminOnly(Precondition):
 	def run(self, **options):
