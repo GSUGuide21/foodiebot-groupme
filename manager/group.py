@@ -21,6 +21,7 @@ class Group(Manager):
 		yield from self.members.values()
 
 	def fetch(self):
+		print(self.url)
 		response = requests.get(f"{self.url}?token={self.access_token}").json()["response"]
 
 		sleep(2)
