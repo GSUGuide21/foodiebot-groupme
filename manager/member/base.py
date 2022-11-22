@@ -1,5 +1,5 @@
 import os, time, requests
-from manager import Manager, Group
+from manager import *
 from util import urljoin
 
 class Member(Manager):
