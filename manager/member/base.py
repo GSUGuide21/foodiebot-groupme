@@ -4,7 +4,7 @@ from util import urljoin
 
 class Member(Manager):
 	def __init__(self, user, group):
-		super(Member, self).__init__(path="/groups")
+		super(Member, self).__init__(path="groups")
 		self.group: Group = group
 		self.access_token = self.group.access_token
 		self.nick: str = user["nickname"]

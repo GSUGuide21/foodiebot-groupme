@@ -13,7 +13,7 @@ class Group(Manager):
 		self.coowners: dict[str, Member] = {}
 		self.admins: dict[str, Member] = {}
 		self.owner = None
-
+		
 	def __repr__(self):
 		return f"{self.name} ({self.group_id})"
 
