@@ -1,49 +1,147 @@
-import os, re, requests, random
-from util import Group
+import os
+import random
+import re
+from typing import TypeVar
 from io import BytesIO
-from PIL import Image, ExifTags, ImageSequence
+
+import requests
+from PIL import ExifTags, Image, ImageSequence
+
+from manager import Group, ImageManager, Manager
 from util import Argument, arguments, preconditions
 
-API_URL = "https://api.groupme.com/v3/groups"
-IMAGE_URL = "https://image.groupme.com/pictures"
+T = TypeVar("T")
 
-class Command:
-	DESCRIPTION = "No description included"
+class Command(ImageManager):
+	DESCRIPTION = "No description provided!"
 	MINIMUM_ARGUMENTS = 0
 	PRECONDITIONS = []
-	ACCESS_TOKEN = os.environ.get("access_token")
 	ALIASES = []
 	CATEGORY = "None"
 	ARGUMENT_TYPE = "string"
 
 	def __init__(self):
-		print(f"Command ({self.__class__.__name__}) loaded!")
+		super().__init__(path="pictures")
+		self.access_token = os.environ.get("access_token")
+		print(f"Command ({self.__class__.__name__}) has been loaded!")
 
 	def wave(self):
 		return "👋" + random.choice("🏻🏼🏽🏾🏿")
 
-	def bullet(self, pairs, embellish_first=False) -> str:
+	def mention_users(self, **options):
+		reply = options.get("reply", None)
+		user_ids = options.get("user_ids", [])
+
+		if len(user_ids) == 0: return reply
+		if reply == None or reply == "": return reply
+
+		result = {}
+
+		if isinstance(reply, str):
+			result["text"] = reply
+		elif isinstance(reply, (tuple, list)):
+			text, image = reply
+			result["text"] = text
+			result["picture_url"] = image
+		else:
+			result = reply
+
+		if result.get("picture_url") or result["text"]:
+			result["attachments"] = result["attachments"] or []
+			if len(result["attachments"]) > 0:
+				for index, attachment in enumerate(result["attachments"]):
+					if attachment["type"] == "mentions":
+						if "user_ids" in attachment and isinstance(attachment["user_ids"], list):
+							result["attachments"][index]["user_ids"] = attachment["user_ids"].extend(user_ids)
+							break
+			else:
+				result["attachments"].append({
+					"type": "mentions",
+					"user_ids": user_ids
+				})
+
+		return result
+
+
+	def mention(self, **options):
+		reply = options.get("reply", None)
+		sender = options.get("sender", None)
+
+		if sender is None: return reply
+		if reply == None or reply == "": return reply
+
+		result = {}
+
+		if isinstance(reply, str):
+			result["text"] = reply
+		elif isinstance(reply, (tuple, list)):
+			text, image = reply
+			result["text"] = text
+			result["picture_url"] = image
+		else:
+			result = reply
+
+		if result.get("picture_url") or result["text"]:
+			user_id = sender["user_id"]
+			result["attachments"] = result.get("attachments", [])
+			if len(result["attachments"]) > 0:
+				for index, attachment in enumerate(result["attachments"]):
+					if attachment["type"] == "mentions":
+						if "user_ids" in attachment and isinstance(attachment["user_ids"], list):
+							result["attachments"][index]["user_ids"] = attachment["user_ids"].extend(user_id)
+							break
+			else:
+				result["attachments"].append({
+					"type": "mentions",
+					"user_ids": [user_id]
+				})
+
+		return result
+
+	def bullet(self, **options) -> str:
+		pairs = options.get("pairs")
+		embellish_first = options.get("embellish_first", False)
+
 		response = ""
 		if embellish_first:
 			if type(pairs) == tuple:
 				pairs = list(pairs)
 			title, value = pairs.pop(0)
-			response += f"--- {title}: {value} --\n"
+			response += f"--- {title}: {value} ---\n"
+
 		for title, value in pairs:
-			if value:
-				response += f"{title}: {value}\n"
-		return response
+			if value: response += f"{title}: {value}\n"
+		
+		return response.strip()
 
-	def precondition(self, **options):
-		pass
+	def validate(self, **options):
+		for key, precondition in preconditions.items():
+			if key in self.PRECONDITIONS:
+				if precondition.run(**options):
+					return True
 
-	def parse_arguments(self, query):
+		return self.is_valid(**options)
+
+	def is_valid(self, **options):
+		return True
+
+	@property
+	def args(self) -> Argument:
 		arg_type = self.ARGUMENT_TYPE.lower()
-		arg_type = arg_type	if arg_type in arguments else "string"
+		arg_type = arg_type if arg_type in arguments else "string"
+		target = arguments[arg_type]
 
-		arg: Argument = arguments[arg_type]()
-		return arg.run()
-	
+		if isinstance(target, str):
+			if target in arguments:
+				target = arguments[target]
+			else:
+				target = arguments["string"]
+
+		return target()
+
+	def parse_arguments(self, **options):
+		return self.args.run(**options)
+
 	@staticmethod
 	def safe_spaces(text):
 		text.replace("\t", " " * 4)
@@ -52,22 +150,25 @@ class Command:
 	def normalize(self, text):
 		return text.lower().replace(" ", "")
 
-	def run(self, **options):
+	def ok(self, **options):
 		pass
-	
-	def response(self, **options):
+
+	def error(self, **options):
 		pass
+
+	def respond(self, **options):
+		return self.ok(**options) if self.validate(**options) else self.error(**options)
 
 class ImageCommand(Command):
-	def upload_image(self, data) -> str:
+	def upload_image(self, data, type="jpeg") -> str:
 		headers = {
-			"X-Access-Token": self.ACCESS_TOKEN,
-			"Content-Type": "image/jpeg"
+			"X-Access-Token": self.access_token,
+			"Content-Type": f"image/{type}"
 		}
 
-		r = requests.post(IMAGE_URL, data=data, headers=headers)
+		r = requests.post(self.url, data=data, headers=headers)
 		return r.json()["payload"]["url"]
-
+	
 	def rotate_upright(self, image: Image):
 		try:
 			for orientation in ExifTags.TAGS.keys():
@@ -99,11 +200,10 @@ class ImageCommand(Command):
 	def upload_gif_image(self, original: Image):
 		output = BytesIO()
 		duration = original.info["duration"]
-		frames = [frame.copy() for frame in ImageSequence.Iterator(original)]
-		frames_iter = iter(frames)
-		image = next(frames_iter)
-		image.save(output, format="GIF", append_images=frames_iter, duration=duration/1500.0, loop=1, mode="RGB")
-		return self.upload_image(output.getvalue())
+		frames = iter([frame.copy() for frame in ImageSequence.Iterator(original)])
+		image = next(frames)
+		image.save(output, format="GIF", append_images=frames, duration=duration/2000.0, loop=1, mode="RGB")
+		return self.upload_image(output.getvalue(), "gif")
 
 	def pil_from_url(self, url):
 		response = requests.get(url, stream=True)

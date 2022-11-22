@@ -1,6 +1,6 @@
 import os
-import random
 import re
+from random import randint
 from .base import Command
 
 class Random(Command):
@@ -10,8 +10,13 @@ class Random(Command):
 	CATEGORY = "Fun"
 	
 	def handle_bounds(self, result: list[str] | None):
-		a = int(result[0] or 0)
-		b = int(result[1] or 5)
+		a, b = result
+
+		a = a if a != None or a != "" else 0
+		b = b if b != None or b != "" else 5
+
+		a = int(a)
+		b = int(b)
 
 		_min = min(a, b)
 		_max = max(a, b)
@@ -21,9 +26,10 @@ class Random(Command):
 			"max": _max
 		}
 
-	def respond(self, **options):
-		args = self.parse_arguments(options.get("query", ""))
+	def ok(self, **options):
+		query = options.get('query', '')
+		args = self.parse_arguments(query=query)
 		bounds = self.handle_bounds(args.result)
-		result = random.randint(bounds["min"], bounds["max"])
+		result = randint(bounds["min"], bounds["max"])
 
 		return f"FoodieBot has rolled a die! The number landed on {result}"

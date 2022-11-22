@@ -1,7 +1,24 @@
 import os
 import re
 import random
+from util import preconditions
 
+class Response:
+	PRECONDITIONS = []
+
+	def __init__(self):
+		print(f"Response ({self.__class__.__name__}) loaded!")
+	
+	def wave(self):
+		return "👋" + random.choice("🏻🏼🏽🏾🏿")
+
+	def validate(self, **options):
+		pass
+
+	def respond(self, **options):
+		pass
+
+"""
 class Response:
 	REGEX = re.compile(r"(.+)", re.MULTILINE)
 	USERNAME_REGEX = re.compile(r"%USER(?:NAME|)%", flags=re.IGNORECASE | re.MULTILINE)
@@ -22,3 +39,4 @@ class Response:
 
 	def respond(self, message, matches):
 		pass
+"""

@@ -3,6 +3,7 @@ import re
 import random
 from .base import Response
 
+
 class EssayBotDetect(Response):
 	REGEX = re.compile(r"https?\://(?:e?x(?:tra|)essay(?:[sz]|service|)|paper(?:ok|c|z|s|g))\.(?:cf|ml|ga|gq)", flags=re.MULTILINE | re.IGNORECASE)
 	USERNAME_REGEX = re.compile(r"%USER(?:NAME|)%", flags=re.IGNORECASE | re.MULTILINE)

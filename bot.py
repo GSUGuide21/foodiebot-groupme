@@ -1,13 +1,280 @@
-import os, json, requests, re, time
-from threading import Thread
+import json
+import os
+import re
+import time
 from importlib import reload
-
+from threading import Thread
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+import requests
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
+from methods import commands, responses, service, system
+from util import Group, Manager, Member, Message, SenderType
+
+
+class FoodieBot(Manager):
+	def __init__(self, **config):
+		super(FoodieBot, self).__init__(path="bots")
+
+		self.bot_id = config.get("bot_id", os.environ.get("bot_id", ""))
+		self.app_id = config.get("app_id", os.environ.get("app_id", ""))
+		self.prefix = config.get("prefix", os.environ.get("prefix", ""))
+		self.max_message_length = config.get("max_message_length", os.environ.get("max_message_length", ""))
+		self.access_token = config.get("access_token", os.environ.get("access_token", ""))
+
+	def reply(self, **options):
+		message = options.get("message", "")
+		group_id = options.get("group_id", "")
+		self.send(message=message, group_id=group_id)
+
+	def send(self, **options):
+		message = options.get("message", "")
+		group_id = options.get("group_id", "")
+
+		if message == "" or group_id == "":
+			return None
+
+		responses = []
+		message = Message(message)
+		group = Group(group_id).fetch()
+		sender = group.find_member(message.user_id)
+
+		params = {
+			"message": message,
+			"group": group,
+			"client": self
+		}
+
+		if message.sender_type == SenderType.User:
+			params["sender"] = sender
+			if message.text.startswith(self.prefix):
+				response = self.parse_command(**params)
+				if response != None: responses.append(response)
+			else: 
+				response = self.parse_response(**params)
+				if response != None: responses.append(response)
+
+		if message.sender_type == SenderType.System:
+			params["sender"] = None
+			response = self.parse_system(**params)
+			if response != None: responses.append(response)
+
+		if message.sender_type == SenderType.Service:
+			pass
+
+		self.respond(result=responses, group_id=group_id)
+	
+	def parse_command(self, **options):
+		message = options.get("message", None)
+		sender = options.get("sender", None)
+
+		if message is None: return None
+
+		parts = message.text[len(self.prefix):].strip().split(None, 1)
+		command = parts.pop(0).lower()
+		query = parts[0] if len(parts) > 0 else ""
+
+		print(query)
+
+		if self.prefix in command: return None
+
+		params = {
+			"message": message,
+			"sender": sender,
+			"command": command,
+			"query": query,
+			"bot_id": self.bot_id,
+			"app_id": self.app_id,
+			"client": self
+		}
+
+		return self.init_command(**params)
+
+	def init_command(self, **params):
+		command = params.get("command")
+
+		if command == "": return ""
+		query = params.get("query", "")
+
+		if command == "help":
+			if query != "":
+				query = query.strip(self.prefix).lower()
+				return self.render_help(command=query)
+
+			else: return self.render_help()
+		
+		if command in commands:
+			curr = commands[command]
+			return curr.respond(**params)
+		
+		sender: Member = params.get("sender")
+		message = params.get("message")
+		bot_id = params.get("bot_id")
+		app_id = params.get("app_id")
+		
+		opts = {
+			"message": message,
+			"query": query,
+			"bot_id": bot_id,
+			"app_id": app_id,
+			"sender": sender,
+			"client": self
+		}
+
+		for key, curr in commands.items():
+			if isinstance(curr.ALIASES, list) and len(curr.ALIASES) > 0:
+				if command in curr.ALIASES: 
+					opts["command"] = key
+					return self.init_command(**opts)
+
+		return "Command ({command}) is not available to you at this moment. Come back later".format(command=command)
+
+	def render_help(self, **params):
+		command = params.get("command", "")
+
+		if command != "": return self.render_help_by_command(command)
+
+		info = {}
+
+		for key, command in commands.items():
+			desc = command.DESCRIPTION
+			aliases = command.ALIASES or []
+			category = command.CATEGORY
+
+			info[category] = info.get(category, [])
+
+			opts = { "description": desc, "aliases": aliases, "command": key }
+			result = self.render_help_item(**opts)
+
+			info[category].append(result)
+
+		response = []
+
+		for category, cmds in info.items():
+			cmd = "({category})\n{cmds}".format(category=category, commands=str.join("\n", cmds))
+			response.append(cmd)
+
+		return "---Help---\n{info}".format(info=str.join("\n", response))
+
+	def render_help_by_command(self, command):
+		if command in commands:
+			curr = commands[command]
+			desc = curr.DESCRIPTION
+			aliases = curr.ALIASES
+			category = curr.CATEGORY
+
+			opts = { 
+				"description": desc, 
+				"aliases": "", 
+				"category": "", 
+				"prefix": self.prefix,
+				"command": command
+			}
+
+			if isinstance(aliases, list) and len(aliases) > 0:
+				aliases_s = str.join(", ", aliases)
+				opts["aliases"] = "\nAliases: {aliases}".format(aliases=aliases_s)
+
+			if category != "":
+				opts["category"] = "\nCategory: {category}".format(category=category)
+
+			return "{prefix}{command}: {description}{category}{aliases}".format(**opts)
+		else:
+			for key, curr in commands.items():
+				if isinstance(curr.ALIASES, list) and len(curr.ALIASES) > 0:
+					if command in curr.ALIASES:
+						return self.render_help_by_command(key)
+
+		return f"The command ({command}) does not exist! Please view the available commands by using $help."
+
+	def parse_response(self, **options):
+		for response in responses.values():
+			if callable(response.validate) and response.validate(**options):
+				return response.respond(**options)
+
+	def parse_system(self, **options):
+		for sys_cmd in system.values():
+			if callable(sys_cmd.validate) and sys_cmd.validate(**options):
+				return sys_cmd.respond(**options)
+
+	def parse_service(self, **options):
+		pass
+
+	def render_help_item(self, **params):
+		command = params.get("command")
+		description = params.get("description")
+		aliases = params.get("aliases")
+
+		opts = {
+			"description": description,
+			"command": command,
+			"prefix": self.prefix,
+			"aliases": ""
+		}
+
+		if isinstance(aliases, list) and len(aliases) > 0:
+			result = str.join(", ", aliases)
+			opts["aliases"] = " (aliases: {result})".format(result=result)
+
+		return "{prefix}{command}: {description}{aliases}".format(**opts)
+
+	def respond(self, **options):
+		message = options.get("result")
+		group_id = options.get("group_id")
+
+		if isinstance(message, list):
+			for item in message:
+				self.respond(result=item, group_id=group_id)
+			return
+
+		if isinstance(message, (dict, Message)):
+			message["bot_id"] = self.bot_id
+			return self.respond_from_data(data=message, group_id=group_id)
+
+		data = {
+			"bot_id": self.bot_id
+		}
+
+		image = None
+
+		if isinstance(message, tuple):
+			message, image = message
+
+		if message is None:
+			message = ""
+
+		if len(message) > self.max_message_length:
+			for block in [message[i:i + self.max_message_length] for i in range(0, len(message), self.max_message_length)]:
+				self.send(result=block, group_id=group_id)
+				time.sleep(0.3)
+
+			data["text"] = ""
+		
+		else: data["text"] = message
+
+		if image != None: data["picture_url"] = image
+
+		self.respond_from_data(data)
+
+	def respond_from_data(self, data):
+		if data["text"] or data.get("picture_url"):
+			response = requests.post(f"{self.url}/post", json=data)
+
+app = Flask(__name__)
+client = FoodieBot(bot_prefix="$")
+
+@app.route("/", methods=["POST"])
+def receive():
+	message = request.get_json()
+	group_id = message["group_id"]
+
+	Thread(target=client.reply, kwargs={"message": message, "group_id": group_id}).start()
+	return "ok", 200
+
+"""
 from methods import commands, system, responses
 from util import Message, SenderType, Group, Member
 
@@ -38,7 +305,6 @@ class FoodieBot:
 		group = Group(group_id).fetch()
 		sender = group.find_member(message.user_id)
 
-		print(f"Owner: {group.owner.nick} ({group.owner.id})")
 		print(f"Sender: {sender.nick} ({sender.id})")
 
 		if message.sender_type == SenderType.User:
@@ -69,6 +335,9 @@ class FoodieBot:
 			)
 			if response != None:
 				responses.append(response)
+
+		if message.sender_type == SenderType.Service:
+			pass
 
 		return responses
 
@@ -210,6 +479,7 @@ class FoodieBot:
 			if callable(response.validate) and response.validate(**options):
 				return response.respond(**options)
 
+
 	def parse_sys(self, **options):
 		for sys_cmd in system.values():
 			if callable(sys_cmd.validate) and sys_cmd.validate(**options):
@@ -268,7 +538,7 @@ class FoodieBot:
 		print(data)
 
 		if data["text"] or data.get("picture_url"):
-			response = requests.post(f"{self.BOT_ENDPOINT}/post", json=data)		
+			response = requests.post(f"{self.BOT_ENDPOINT}/post", json=data)
 
 
 app = Flask(__name__)
@@ -281,3 +551,4 @@ def receive():
 
 	Thread(target=client.reply, args=(message, group_id)).start()
 	return "ok", 200
+"""
