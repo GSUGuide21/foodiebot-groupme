@@ -1,7 +1,7 @@
 import os, re, requests
 from time import sleep
-from .base import Manager
-from .member import Member
+from .base import *
+from .member import *
 
 class Group(Manager):
 	def __init__(self, **options):

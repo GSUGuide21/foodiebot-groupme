@@ -1,4 +1,4 @@
-import manager
+from manager import *
 from .base import *
 
 class OwnerOnly(Precondition):
@@ -6,7 +6,7 @@ class OwnerOnly(Precondition):
 		pass
 
 	def run(self, **options):
-		group: manager.Group = options["group"]
+		group: Group = options["group"]
 		user_id = options["message"]["user_id"]
 		owner = group.owner
 		return owner.user_id == user_id
