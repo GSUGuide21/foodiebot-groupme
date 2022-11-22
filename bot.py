@@ -12,7 +12,8 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from methods import commands, responses, service, system
-from util import Group, Manager, Member, Message, SenderType
+from util import Message, SenderType
+from manager import Group, Manager, Member
 
 
 class FoodieBot(Manager):
