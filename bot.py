@@ -25,8 +25,8 @@ class FoodieBot(Manager):
 		self.max_message_length = config.get("max_message_length", os.environ.get("max_message_length", ""))
 		self.access_token = config.get("access_token", os.environ.get("access_token", ""))
 
-	def reply(self, message, *args):
-		print(args)
+	def reply(self, **message):
+		print(message)
 		print(self.url)
 
 		responses = []
@@ -339,7 +339,7 @@ client = FoodieBot(bot_prefix="$")
 @app.route("/", methods=["POST"])
 def receive():
 	message = request.get_json()
-	Thread(target=client.reply, args=(message)).start()
+	Thread(target=client.reply, kwargs=message).start()
 	return "ok", 200
 
 """
