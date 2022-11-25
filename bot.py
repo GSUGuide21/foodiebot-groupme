@@ -15,7 +15,76 @@ from methods import commands, responses, service, system
 from util import Message, SenderType
 from manager import Group, Manager, Member
 
+class FoodieBot(Manager):
+	def __init__(self, **config):
+		super(FoodieBot, self).__init__(path="bots")
 
+		self.bot_id = config.get("bot_id", os.environ.get("bot_id", ""))
+		self.app_id = config.get("app_id", os.environ.get("app_id", ""))
+		self.prefix = config.get("prefix", os.environ.get("prefix", ""))
+		self.max_message_length = config.get("max_message_length", os.environ.get("max_message_length", ""))
+		self.access_token = config.get("access_token", os.environ.get("access_token", ""))
+
+	def reply(self, message):
+		print(self.url)
+		
+		responses = []
+		group_id = message.get("group_id")
+
+		if message is None or group_id == "": return None
+
+		message = Message(message)
+		group = Group(group_id=group_id).fetch()
+		sender = group.find_member(message.user_id)
+
+		params = {
+			"message": message,
+			"group": group,
+			"client": self
+		}
+
+		if message.sender_type == SenderType.User:
+			params["sender"] = sender
+			if message.text.startswith(self.prefix):
+				print(message)
+
+	def respond(self, **data):
+		message = data.get("result")
+		group_id = data.get("group_id")
+
+		if isinstance(message, list):
+			for item in message: self.respond(result=item, group_id=group_id)
+			return
+
+		if isinstance(message, (dict, Message)):
+			message["bot_id"] = self.bot_id
+			return self.respond_from_data(message)
+
+		params = { "bot_id": self.bot_id }
+		image = None
+
+		if isinstance(message, tuple):
+			message, image = message
+
+		if message is None: message = ""
+
+		if len(message) > self.max_message_length:
+			for block in [message[i:i + self.max_message_length] for i in range(0, len(message), self.max_message_length)]:
+				self.respond(result=block, group_id=group_id)
+				time.sleep(0.3)
+
+			params["text"] = ""
+
+		else: params["text"] = message
+
+		if image != None: data["picture_url"] = image
+
+		self.respond_from_data(params)
+
+	def respond_from_data(self, params):
+		if params["text"] or params.get("picture_url"):
+			response = requests.post(f"{self.url}/post", json=params)
+"""		
 class FoodieBot(Manager):
 	def __init__(self, **config):
 		super(FoodieBot, self).__init__(path="bots")
@@ -261,6 +330,7 @@ class FoodieBot(Manager):
 	def respond_from_data(self, data):
 		if data["text"] or data.get("picture_url"):
 			response = requests.post(f"{self.url}/post", json=data)
+"""
 
 app = Flask(__name__)
 client = FoodieBot(bot_prefix="$")
@@ -268,9 +338,7 @@ client = FoodieBot(bot_prefix="$")
 @app.route("/", methods=["POST"])
 def receive():
 	message = request.get_json()
-	group_id = message["group_id"]
-
-	Thread(target=client.reply, kwargs={"message": message, "group_id": group_id}).start()
+	Thread(target=client.reply, args=(message)).start()
 	return "ok", 200
 
 """

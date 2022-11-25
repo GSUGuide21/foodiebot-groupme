@@ -25,5 +25,15 @@ class Message:
 	@property
 	def image_url(self):
 		attachments = [attachment for attachment in self.raw["attachments"] if attachment["type"] == "image"]
-		if attachments:
+		if attachments and len(attachments) > 0:
 			return attachments[0]["url"]
+
+	@property
+	def mentions(self):
+		attachments = [attachment for attachment in self.raw["attachments"] if attachment["type"] == "mentions"]
+		if attachments and len(attachments) > 0:
+			user_ids = attachments[0]["user_ids"]
+			loci = attachments[0]["loci"]
+
+			params = {"user_ids": user_ids, "loci": loci}
+			return params
