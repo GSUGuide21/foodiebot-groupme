@@ -25,9 +25,10 @@ class FoodieBot(Manager):
 		self.max_message_length = config.get("max_message_length", os.environ.get("max_message_length", ""))
 		self.access_token = config.get("access_token", os.environ.get("access_token", ""))
 
-	def reply(self, message):
+	def reply(self, message, *args):
+		print(args)
 		print(self.url)
-		
+
 		responses = []
 		group_id = message.get("group_id")
 
