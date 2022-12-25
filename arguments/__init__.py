@@ -11,5 +11,4 @@ for file in files:
 	try:
 		arguments[filename] = import_module(file, ".").load()
 	except ModuleNotFoundError:
-		print(file)
 		arguments[filename] = {}

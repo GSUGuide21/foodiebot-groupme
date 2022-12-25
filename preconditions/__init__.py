@@ -11,5 +11,4 @@ for file in files:
 	try:
 		preconditions[filename] = import_module(file, ".").load()
 	except ModuleNotFoundError:
-		print(file)
 		preconditions[filename] = {}

@@ -12,5 +12,6 @@ for file in files:
 	try:
 		commands[filename] = import_module(file, ".").load()
 	except ModuleNotFoundError:
-		print(file)
 		commands[filename] = {}
+
+	print(commands[filename])
