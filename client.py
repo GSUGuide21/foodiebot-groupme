@@ -17,7 +17,6 @@ class FoodieBot:
 		self.max_messages = os.environ.get("max_messages", 1000)
 		self.access_token = os.environ.get("access_token")
 		self.bot_manager = BotManager()
-		self.driver = Driver()
 		self.polls = []
 		self.messages = []
 		self.events = []
