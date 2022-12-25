@@ -1,70 +1,35 @@
-import os, re, json, requests
+import os, requests
 from time import sleep
-from .base import *
-from .member import *
+from beta.util import RoleType
+from beta.manager.base import Manager
+from beta.manager.calendar import CalendarManager
+from beta.manager.member import Member
+from beta.manager.message import Message
+from beta.manager.poll import PollManager
 
 class Group(Manager):
 	def __init__(self, **options):
-		super(Group, self).__init__(path=f"groups/{options.get('group_id')}")
+		super(Group, self).__init__(path="groups")
+
 		self.access_token = os.environ.get("access_token")
 		self.group_id = options.get("group_id")
 
-		self.members: dict[str, Member] = {}
-		self.coowners: dict[str, Member] = {}
-		self.admins: dict[str, Member] = {}
+		self.url = f"{self.url}/{self.group_id}"
+
 		self.owner = None
+		self.admins: dict[str, Member] = {}
+		self.members: dict[str, Member] = {}
 
-	def __repr__(self):
-		return f"{self.name} ({self.group_id})"
+		self.poll_manager = PollManager(group_id=self.group_id)
+		self.calendar_manager = CalendarManager(group_id=self.group_id)
 
-	def __iter__(self):
-		yield from self.members.values()
+	def get_messages(self):
+		headers = {"X-Access-Token": self.access_token}
+		response = requests.get(f"{self.url}/messages", headers=headers).json()["response"]
+		return [Message(message) for message in response["messages"]]
 
-	def fetch(self):
-		print(self.url)
-		response = requests.get(f"{self.url}?token={self.access_token}").json()["response"]
+	def get_events(self):
+		return self.calendar_manager.get_events()
 
-		sleep(2)
-		self.name = response["name"]
-		self.message_count = response["messages"]["count"]
-		self.creator_id = response["creator_user_id"]
-		self.avatar_url = response["image_url"]
-		self.description = response["description"]
-		self.share_url = response["share_url"]
-		self.requires_approval = response["requires_approval"] or False
-		self.show_join_question = response["show_join_question"] or False
-		self.join_question = response["join_question"] or None
-		self.generate_users(response["members"])
-
-		return self
-
-	def generate_users(self, members):
-		for member in members:
-			self.members[member["user_id"]] = Member(member, self)
-			if "owner" in self.members[member["user_id"]].roles:
-				self.owner = self.members[member["user_id"]]
-			elif "admin" in self.members[member["user_id"]].roles:
-				self.admins[member["user_id"]] = self.members[member["user_id"]]
-
-	def find_member(self, user_id):
-		for member in self.members.values():
-			if member["user_id"] == user_id:
-				return member
-
-		return None
-
-	def find_members(self, user_ids: list):
-		members = []
-		for user_id in user_ids:
-			member = self.find_member(user_id)
-			if member is not None:
-				members.append(member)
-		
-		return members
-
-	def find_members_by_name(self, nick: str):
-		for member in self.members.values():
-			if member.nick == nick:
-				return member
-		
-		return None	
+	def get_polls(self):
+		return self.poll_manager.get_polls()

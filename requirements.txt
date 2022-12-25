@@ -2,7 +2,10 @@ flask
 flask_sqlalchemy
 requests
 gunicorn
+gspread
 pillow
 bs4
 html5lib
 selenium
+praw
+oauth2client

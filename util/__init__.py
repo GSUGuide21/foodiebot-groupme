@@ -1,5 +1,3 @@
-from .sender_type import SenderType
-from .message import Message
-from .arguments import arguments, Argument, SplitArgument
-from .preconditions import preconditions, Precondition
-from .urljoin import urljoin
+from beta.util.roletype import RoleType
+from beta.util.sendertype import SenderType
+from beta.util.urljoin import urljoin

@@ -1,14 +1,21 @@
-from util import urljoin
+import requests
+from beta.util import urljoin
 
 class Manager:
-	BASE_API_ENDPOINT = "https://api.groupme.com/v3/"
+	base_url = "https://api.groupme.com/v3/"
 
 	def __init__(self, **options):
 		self.path = options.get("path", None)
-		self.url = urljoin(self.BASE_API_ENDPOINT, self.path)
+		self.url = urljoin(self.base_url, self.path)
 
 	def __getitem__(self, key):
 		return getattr(self, key)
 
 	def __setitem__(self, key, value):
 		return setattr(self, key, value)
+
+	def get(self, **params):
+		return requests.get(self.url, **params)
+		
+	def post(self, **params):
+		return requests.post(self.url, **params)
