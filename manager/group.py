@@ -1,11 +1,7 @@
 import os, requests
 from time import sleep
 from util import RoleType
-from manager.base import Manager
-from manager.calendar import CalendarManager
-from manager.member import Member
-from manager.message import Message
-from manager.poll import PollManager
+from manager import *
 
 class Group(Manager):
 	def __init__(self, **options):

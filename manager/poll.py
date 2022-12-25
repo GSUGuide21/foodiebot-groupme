@@ -2,8 +2,7 @@ import os
 import requests
 
 from time import sleep
-from manager.base import Manager
-from manager.member import Member
+from manager import *
 
 class PollManager(Manager):
 	def __init__(self, **options):

@@ -1,7 +1,6 @@
 from datetime import datetime
 from util.sendertype import SenderType
-from manager.member import Member
-from manager.group import Group
+from manager import *
 
 class Message:
 	def __init__(self, raw={}, text=None):

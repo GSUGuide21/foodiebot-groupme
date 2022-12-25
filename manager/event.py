@@ -1,4 +1,4 @@
-from manager.member import Member
+from manager import *
 
 class Event:
 	def __init__(self, **options):

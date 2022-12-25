@@ -1,5 +1,5 @@
 import requests
-from manager.base import Manager
+from manager import *
 from util import urljoin, RoleType
 
 class Member(Manager):

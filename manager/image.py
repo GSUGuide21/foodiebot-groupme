@@ -1,4 +1,4 @@
-from manager.base import Manager
+from manager import *
 
 class ImageManager(Manager):
 	BASE_API_ENDPOINT = "https://image.groupme.com/pictures"
