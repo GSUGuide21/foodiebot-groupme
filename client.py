@@ -33,8 +33,15 @@ class FoodieBot:
 		self.events = self.group.get_events()
 		self.polls = self.group.get_polls()
 		self.state = self.get_state()
+		self.send_init_message()
 
-		self.bot_manager.post({"text": "Hey, I'm FoodieBot! I'm going to be your friend today."})
+	def send_init_message(self):
+		data = {
+			"reply": "Hey, I'm FoodieBot! I'm going to be your friend today.",
+			"group_id": self.group_id
+		}
+
+		return self.respond(**data)
 
 	def get_state(self):
 		return {}
