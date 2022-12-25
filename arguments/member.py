@@ -1,4 +1,4 @@
-from manager.group import Member
+from manager.member import Member
 from arguments.base import Argument
 
 class MemberArgument(Argument):
