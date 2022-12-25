@@ -10,7 +10,7 @@ files = list(filter(lambda f: f not in ["__init__.py", "base.py"], files))
 for file in files:
 	filename = file[0:-len(".py")]
 	try:
-		commands[filename] = import_module(file, ".").load()
+		commands[filename] = import_module(f".{filename}", __name__).load()
 	except ModuleNotFoundError:
 		commands[filename] = {}
 
