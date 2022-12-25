@@ -1,4 +1,4 @@
-from beta.commands.base import Command
+from commands.base import Command
 from random import getrandbits
 
 class Capitalize(Command):
@@ -14,5 +14,5 @@ class Capitalize(Command):
 		result = options.get("result")
 		return str.join("", [self.scramble(c) for c in result])
 
-def load(client):
-	return Capitalize(client)
+def load():
+	return Capitalize()

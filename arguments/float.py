@@ -1,5 +1,5 @@
 from numpy import isnan
-from beta.arguments.base import Argument
+from arguments.base import Argument
 
 class FloatArgument(Argument):
 	def run(self, **options):

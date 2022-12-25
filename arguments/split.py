@@ -1,5 +1,5 @@
 from re import split, compile, MULTILINE
-from beta.arguments.base import Argument
+from arguments.base import Argument
 
 class SplitArgument(Argument):
 	split_type = "string"
@@ -82,5 +82,3 @@ class SplitArgument(Argument):
 			return value
 		else:
 			return default
-
-	

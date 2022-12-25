@@ -1,5 +1,5 @@
 import numpy
-from beta.arguments.base import Argument
+from arguments.base import Argument
 
 class BooleanArgument(Argument):
 	def run(self, **options):

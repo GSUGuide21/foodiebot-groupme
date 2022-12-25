@@ -1,6 +1,6 @@
 import requests
-from beta.manager.base import Manager
-from beta.util import urljoin, RoleType
+from manager.base import Manager
+from util import urljoin, RoleType
 
 class Member(Manager):
 	def __init__(self, **options):

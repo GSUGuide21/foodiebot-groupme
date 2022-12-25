@@ -1,5 +1,5 @@
-from beta.manager.group import Group
-from beta.arguments.base import Argument
+from manager.group import Group
+from arguments.base import Argument
 
 class GroupArgument(Argument):
 	warning = "Invalid group ID or key!"

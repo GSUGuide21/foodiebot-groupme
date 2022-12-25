@@ -1,4 +1,4 @@
-from beta.manager import Manager
+from manager import Manager
 
 class BotManager(Manager):
 	def __init__(self):

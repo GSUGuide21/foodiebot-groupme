@@ -1,5 +1,5 @@
 from re import compile, MULTILINE
-from beta.arguments.split import SplitArgument
+from arguments.split import SplitArgument
 
 class SemicolonArgument(SplitArgument):
 	delimiter = compile(r'\s*(?:;)\s*(?=(?:[^"]|"[^"]*"|\'[^\']*\')*$)', MULTILINE)

@@ -1,4 +1,4 @@
-from beta.commands.base import ImageCommand
+from commands.base import ImageCommand
 from PIL import Image
 
 class HereWeGo(ImageCommand):
@@ -10,5 +10,5 @@ class HereWeGo(ImageCommand):
 		image = Image.open("assets/image/herewego.gif")
 		return result, self.upload_gif_image(image)
 
-def load(client):
-	return HereWeGo(client)
+def load():
+	return HereWeGo()

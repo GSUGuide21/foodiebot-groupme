@@ -2,8 +2,8 @@ import os
 import requests
 
 from time import sleep
-from beta.manager.base import Manager
-from beta.manager.member import Member
+from manager.base import Manager
+from manager.member import Member
 
 class PollManager(Manager):
 	def __init__(self, **options):

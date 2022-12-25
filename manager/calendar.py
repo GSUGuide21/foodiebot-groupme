@@ -2,8 +2,8 @@ import os
 import requests
 
 from time import sleep
-from beta.manager.base import Manager
-from beta.manager.event import Event
+from manager.base import Manager
+from manager.event import Event
 
 class CalendarManager(Manager):
 	def __init__(self, **options):

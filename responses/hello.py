@@ -1,6 +1,6 @@
 import re
 import random
-from beta.responses.base import Response
+from responses.base import Response
 
 class Hello(Response):
 	def __init__(self):
@@ -29,3 +29,6 @@ class Hello(Response):
 		}
 
 		return self.subst_all(replacements=replacements, string=result)
+
+def load():
+	return Hello()

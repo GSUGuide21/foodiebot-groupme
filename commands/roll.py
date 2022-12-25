@@ -1,4 +1,4 @@
-from beta.commands.base import Command
+from commands.base import Command
 from random import randint
 
 class Roll(Command):
@@ -24,3 +24,6 @@ class Roll(Command):
 		r = randint(bounds["min"], bounds["max"])
 
 		return f"FoodieBot has rolled a die! The number landed on {r}"
+
+def load():
+	return Roll()

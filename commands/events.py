@@ -1,8 +1,8 @@
 import re
-from beta.commands.base import Command
+from commands.base import Command
 from bs4 import BeautifulSoup
 from time import sleep
-from beta.manager.driver import Driver
+from manager.driver import Driver
 
 driver = Driver().load()
 
@@ -140,3 +140,5 @@ class Events(Command):
 
 		return "Event{plural} found on PIN: \n{event_list}".format(**opts)
 
+def load():
+	return Events()

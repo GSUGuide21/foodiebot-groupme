@@ -3,9 +3,9 @@ import random
 import re
 import requests
 
-from beta.preconditions import preconditions
-from beta.arguments import arguments
-from beta.manager import Group, ImageManager
+from preconditions import preconditions
+from arguments import arguments
+from manager import Group, ImageManager
 
 from io import BytesIO
 from PIL import ExifTags, Image, ImageSequence

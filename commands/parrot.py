@@ -1,4 +1,4 @@
-from beta.commands.base import Command
+from commands.base import Command
 
 class Parrot(Command):
 	description = "Parrots the user who prompted the command."
@@ -16,3 +16,6 @@ class Parrot(Command):
 		reply = {"text": result}
 
 		return self.reply(reply=reply, message=message)
+
+def load():
+	return Parrot()

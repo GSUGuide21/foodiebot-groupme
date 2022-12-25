@@ -1,5 +1,5 @@
-from beta.manager.group import Member
-from beta.arguments.base import Argument
+from manager.group import Member
+from arguments.base import Argument
 
 class MemberArgument(Argument):
 	warning = "Invalid member ID or key!"

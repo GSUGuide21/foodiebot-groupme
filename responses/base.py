@@ -2,7 +2,7 @@ import os
 import re
 import random
 
-from beta.preconditions import preconditions
+from preconditions import preconditions
 
 class Response:
 	preconditions = []

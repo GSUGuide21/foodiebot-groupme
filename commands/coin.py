@@ -1,4 +1,4 @@
-from beta.commands.base import Command
+from commands.base import Command
 from random import choice
 
 class Coin(Command):
@@ -29,5 +29,5 @@ class Coin(Command):
 
 		return f"FoodieBot has flipped a coin! It landed on {coin}"
 
-def load(client):
-	return Coin(client)
+def load():
+	return Coin()

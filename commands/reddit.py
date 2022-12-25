@@ -1,6 +1,6 @@
 import os
 import praw
-from beta.commands.base import Command
+from commands.base import Command
 
 class RedditCommand(Command):
 	description = "Fetches information from the subreddit"
@@ -37,3 +37,6 @@ class RedditCommand(Command):
 
 		info = [self.parse_submission(submission) for submission in submissions]
 		return str.join("\n", info)
+
+def load():
+	return RedditCommand()

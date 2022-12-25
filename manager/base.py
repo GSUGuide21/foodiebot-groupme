@@ -1,5 +1,5 @@
 import requests
-from beta.util import urljoin
+from util import urljoin
 
 class Manager:
 	base_url = "https://api.groupme.com/v3/"

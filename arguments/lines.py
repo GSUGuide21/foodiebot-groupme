@@ -1,4 +1,4 @@
-from beta.arguments.split import SplitArgument
+from arguments.split import SplitArgument
 
 class LinesArgument(SplitArgument):
 	delimiter = "\n"

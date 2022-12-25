@@ -3,11 +3,11 @@ import re
 import time
 import requests
 
-from beta.commands import commands
-from beta.responses import responses
-from beta.system import system
-from beta.util import SenderType, RoleType
-from beta.manager import Message, Group, Member, BotManager, Driver
+from commands import commands
+from responses import responses
+from system import system
+from util import SenderType, RoleType
+from manager import Message, Group, Member, BotManager
 
 class FoodieBot:
 	def __init__(self):
