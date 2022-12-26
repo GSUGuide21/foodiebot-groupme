@@ -26,6 +26,7 @@ class FoodieBot:
 		group_id = os.environ.get("group_id", "")
 		self.group_id = group_id if group_id != "" or group_id != None else ""
 		self.group = Group(group_id=group_id) if self.group_id else None
+		print(self.group)
 
 		if self.group is None: return
 
@@ -52,6 +53,8 @@ class FoodieBot:
 
 		msg = Message(message)
 		self.messages.append(msg)
+
+		print(msg)
 
 		responses = []
 		group = Group(group_id=group_id).fetch()
