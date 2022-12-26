@@ -5,5 +5,5 @@ class PipeArgument(SplitArgument):
 	delimiter = compile(r'\s*(?:\|)\s*(?=(?:[^"]|"[^"]*"|\'[^\']*\')*$)', MULTILINE)
 	split_type = "pattern"
 
-def load():
-	return PipeArgument()
+def load(command=None):
+	return PipeArgument(command)

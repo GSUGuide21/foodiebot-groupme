@@ -10,5 +10,5 @@ class IntegerArgument(Argument):
 		self.result = result
 		return self
 
-def load():
-	return IntegerArgument()
+def load(command=None):
+	return IntegerArgument(command)

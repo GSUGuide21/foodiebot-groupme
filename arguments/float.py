@@ -10,5 +10,5 @@ class FloatArgument(Argument):
 		self.result = result
 		return self
 
-def load():
-	return FloatArgument()
+def load(command=None):
+	return FloatArgument(command)

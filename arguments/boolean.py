@@ -11,5 +11,5 @@ class BooleanArgument(Argument):
 		self.result = result
 		return self
 
-def load():
-	return BooleanArgument()
+def load(command=None):
+	return BooleanArgument(command)

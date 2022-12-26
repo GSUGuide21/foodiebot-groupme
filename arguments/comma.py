@@ -5,5 +5,5 @@ class CommaArgument(SplitArgument):
 	delimiter = compile(r'\s*(?:,)\s*(?=(?:[^"]|"[^"]*"|\'[^\']*\')*$)')
 	split_type = "pattern"
 
-def load():
-	return CommaArgument()
+def load(command=None):
+	return CommaArgument(command)

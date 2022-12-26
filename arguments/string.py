@@ -6,5 +6,5 @@ class StringArgument(Argument):
 		self.result = str(query)
 		return self
 
-def load():
-	return StringArgument()
+def load(command=None):
+	return StringArgument(command)
