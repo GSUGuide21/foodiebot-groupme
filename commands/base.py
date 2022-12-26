@@ -126,7 +126,7 @@ class Command:
 		arg = arguments[t] if arguments in t else arguments["string"]
 		
 		if isinstance(arg, str): arg = arguments[arg] if arg in arguments else arguments["string"]
-		return arg(self)
+		return arg()
 
 	def mention_owner(self, **options):
 		group = options.get("group", None)

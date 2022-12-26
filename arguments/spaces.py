@@ -5,5 +5,5 @@ class SpacesArgument(SplitArgument):
 	delimiter = compile(r'\s*(?=(?:[^"]|"[^"]*"|\'[^\']*\')*$)', MULTILINE)
 	split_type = "pattern"
 
-def load(command=None):
-	return SpacesArgument(command)
+def load():
+	return SpacesArgument()

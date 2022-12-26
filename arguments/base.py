@@ -1,8 +1,7 @@
 class Argument:
 	warning = "You do not have enough arguments for me to run this command!"
 
-	def __init__(self, command):
-		self.command = command
+	def __init__(self):
 		self.result = None
 		print(f"Argument ({self.__class__.__name__}) has been loaded!")
 

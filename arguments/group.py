@@ -17,5 +17,5 @@ class GroupArgument(Argument):
 		self.result = Group(id=group_id)
 		return self
 
-def load(command=None):
-	return GroupArgument(command)
+def load():
+	return GroupArgument()

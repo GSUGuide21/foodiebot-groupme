@@ -12,5 +12,5 @@ class MemberArgument(Argument):
 		self.result = Member(id=member_id)
 		return self
 
-def load(command=None):
-	return MemberArgument(command)
+def load():
+	return MemberArgument()
