@@ -8,8 +8,7 @@ client = FoodieBot()
 @app.post("/")
 def receive():
 	message = request.get_json()
-	Thread(target=client.reply, kwargs=message)
+	Thread(target=client.reply, kwargs=message).start()
 	return "ok", 200
 
-if __name__ == '__main__':
-	client.dispatch()
+client.dispatch()
