@@ -118,6 +118,7 @@ class Client:
     return self.bot_manager.POST(path="/post", json=payload, timeout=10)
 
   def reply(self, **message: Any):
+    print(message)
     sender_type = message.get("sender_type")
     if sender_type == "bot":
       return None
