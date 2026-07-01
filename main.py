@@ -1,14 +1,26 @@
-from flask import Flask, request
-from threading import Thread
-from client import FoodieBot
+from __future__ import annotations
 
-app = Flask(__name__)
-client = FoodieBot()
+import os
 
-@app.post("/")
-def receive():
-	message = request.get_json()
-	Thread(target=client.reply, kwargs=message).start()
-	return "ok", 200
+from client.runtime import ClientRuntime
 
-client.dispatch()
+def _resolve_port(default: int = 5000) -> int:
+	raw = os.environ.get("PORT")
+	if not raw:
+		return default
+
+	try:
+		return int(raw)
+	except ValueError:
+		return default
+
+
+runtime = ClientRuntime()
+runtime.dispatch()
+app = runtime.app
+
+if __name__ == "__main__":
+	app.run(
+		host=os.environ.get("HOST", "0.0.0.0"),
+		port=_resolve_port(),
+	)
