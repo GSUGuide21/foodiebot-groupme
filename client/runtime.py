@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from threading import Thread
 from client.client import Client
-
-load_dotenv()
 
 class ClientRuntime:
   def __init__(self):

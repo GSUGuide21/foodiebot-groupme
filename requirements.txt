@@ -9,4 +9,4 @@ html5lib
 selenium
 praw
 oauth2client
-dotenv
+python-dotenv
