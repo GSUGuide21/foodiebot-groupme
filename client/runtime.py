@@ -24,7 +24,7 @@ class ClientRuntime:
         "group_configured": bool(os.environ.get("group_id")),
       }), 200
 
-    @self.app.post("/")
+    @self.app.route("/", methods=["POST"])
     def receive_message():
       data = request.get_json()
       print("[webhook] payload received:", data)
