@@ -175,7 +175,11 @@ class CommandRouter:
     if module_name in self._loaded_extensions:
       return False
 
-    module = importlib.import_module(module_name)
+    try:
+      module = importlib.import_module(module_name)
+    except ImportError:
+      return False
+
     command_classes = [
       obj
       for obj in vars(module).values()
