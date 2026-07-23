@@ -115,7 +115,7 @@ class Client:
       for candidate in (payload, group_obj, subgroup_obj):
         if not isinstance(candidate, dict):
           continue
-        name_value = candidate.get("name")
+        name_value = candidate.get("name") or candidate.get("topic")
         if name_value is not None and str(name_value).strip().lower() == expected:
           return True
 
@@ -131,9 +131,17 @@ class Client:
     for candidate in (payload, payload.get("group"), payload.get("subgroup")):
       if not isinstance(candidate, dict):
         continue
-      name_value = candidate.get("name")
+      name_value = candidate.get("name") or candidate.get("topic")
       if name_value is not None and str(name_value).strip().lower() == expected:
         return True
+
+    try:
+      for subgroup in group.list_subgroups(page=1, per_page=100):
+        subgroup_name = str(subgroup.get("topic") or subgroup.get("name") or "").strip().lower()
+        if subgroup_name == expected:
+          return True
+    except Exception:
+      return False
 
     return False
 

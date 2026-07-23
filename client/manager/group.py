@@ -44,6 +44,31 @@ class Group(Manager):
 
     return [member for member in members if isinstance(member, dict)]
 
+  def list_subgroups(self, page: int = 1, per_page: int = 10) -> list[dict[str, Any]]:
+    headers = {"X-Access-Token": self.token}
+    params = {
+      "page": max(1, int(page)),
+      "per_page": max(1, int(per_page)),
+    }
+    response = self.GET(headers=headers, path="/subgroups", params=params)
+    payload = self._json_response_or_payload(response)
+
+    if isinstance(payload, list):
+      return [subgroup for subgroup in payload if isinstance(subgroup, dict)]
+
+    if not isinstance(payload, dict):
+      return []
+
+    subgroups = payload.get("subgroups")
+    if isinstance(subgroups, list):
+      return [subgroup for subgroup in subgroups if isinstance(subgroup, dict)]
+
+    response_value = payload.get("response")
+    if isinstance(response_value, list):
+      return [subgroup for subgroup in response_value if isinstance(subgroup, dict)]
+
+    return []
+
   def update(self, **options: Any):
     headers = {"X-Access-Token": self.token}
     return self.POST(headers=headers, path="/update", **options).json()["response"]
