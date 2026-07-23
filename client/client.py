@@ -94,19 +94,20 @@ class Client:
       or os.environ.get("init_group_name")
       or "Bot Testing"
     ).strip()
-    if init_group_name and not self._group_name_matches(group_id, init_group_name):
-      return None
+    matched_group_id = self._resolve_named_group_id(group_id, init_group_name)
+    if matched_group_id:
+      self.group_id = matched_group_id
 
     return self.send_init_msg()
 
-  def _group_name_matches(self, group_id: str, expected_name: str) -> bool:
+  def _resolve_named_group_id(self, group_id: str, expected_name: str) -> str:
     expected = expected_name.strip().lower()
     if not expected:
-      return True
+      return group_id
 
     token = str(self.token or os.environ.get("token") or "")
     if not token:
-      return False
+      return group_id
 
     payload = self.group if isinstance(self.group, dict) else None
     if isinstance(payload, dict):
@@ -117,33 +118,36 @@ class Client:
           continue
         name_value = candidate.get("name") or candidate.get("topic")
         if name_value is not None and str(name_value).strip().lower() == expected:
-          return True
+          resolved_id = candidate.get("id") or candidate.get("group_id")
+          return str(resolved_id).strip() or group_id
 
     try:
       group = Group(group_id, token=token)
       payload = group.get()
     except Exception:
-      return False
+      return group_id
 
     if not isinstance(payload, dict):
-      return False
+      return group_id
 
     for candidate in (payload, payload.get("group"), payload.get("subgroup")):
       if not isinstance(candidate, dict):
         continue
       name_value = candidate.get("name") or candidate.get("topic")
       if name_value is not None and str(name_value).strip().lower() == expected:
-        return True
+        resolved_id = candidate.get("id") or candidate.get("group_id")
+        return str(resolved_id).strip() or group_id
 
     try:
       for subgroup in group.list_subgroups(page=1, per_page=100):
         subgroup_name = str(subgroup.get("topic") or subgroup.get("name") or "").strip().lower()
         if subgroup_name == expected:
-          return True
+          resolved_id = subgroup.get("id") or subgroup.get("group_id")
+          return str(resolved_id).strip() or group_id
     except Exception:
-      return False
+      return group_id
 
-    return False
+    return group_id
 
   def send_init_msg(self):
     return self.respond(reply="Hey, I'm FoodieBot! I'm going to be your friend today.")
