@@ -87,7 +87,7 @@ class Client:
 
     self.group_id = group_id
     self.group = data.get("group", {"group_id": group_id})
-    # return self.send_init_msg()
+    return self.send_init_msg()
 
   def send_init_msg(self):
     return self.respond(reply="Hey, I'm FoodieBot! I'm going to be your friend today.")
