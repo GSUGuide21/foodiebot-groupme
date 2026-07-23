@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, request, jsonify
 from threading import Thread
 from client.client import Client
@@ -8,7 +9,7 @@ class ClientRuntime:
     self.app = Flask(__name__)
     self.client = Client()
 
-  def dispatch(self):
+  def dispatch(self, send_init: bool = True):
     print(
       "[startup] bot_id=",
       os.environ.get("bot_id"),
@@ -26,7 +27,7 @@ class ClientRuntime:
 
     @self.app.route("/", methods=["POST"])
     def receive_message():
-      data = request.get_json()
+      data = self._read_webhook_payload()
       print("[webhook] payload received:", data)
       if not data:
         print("[webhook] invalid payload: empty or non-json body")
@@ -41,4 +42,27 @@ class ClientRuntime:
 
       return jsonify({"status": "Message received"}), 200
     
-    self.client.dispatch()
+    if send_init:
+      self.client.dispatch()
+
+  @staticmethod
+  def _read_webhook_payload() -> dict | None:
+    data = request.get_json(silent=True)
+    if isinstance(data, dict):
+      return data
+
+    if request.form:
+      form_data = request.form.to_dict(flat=True)
+      if form_data:
+        return form_data
+
+    raw_body = request.get_data(as_text=True).strip()
+    if not raw_body:
+      return None
+
+    try:
+      parsed = json.loads(raw_body)
+    except json.JSONDecodeError:
+      return None
+
+    return parsed if isinstance(parsed, dict) else None
