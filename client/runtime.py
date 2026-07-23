@@ -48,6 +48,7 @@ class ClientRuntime:
   @staticmethod
   def _read_webhook_payload() -> dict | None:
     data = request.get_json(silent=True)
+    print(data)
     if isinstance(data, dict):
       return data
 
