@@ -6,6 +6,7 @@ from typing import Any
 from client.commands import CommandRouter
 from client.commands.result import normalize_command_result
 from client.manager import BotManager
+from client.manager.group import Group
 from client.responses import ResponseRouter
 from client.responses.result import normalize_response_result
 
@@ -87,7 +88,54 @@ class Client:
 
     self.group_id = group_id
     self.group = data.get("group", {"group_id": group_id})
+
+    init_group_name = str(
+      data.get("init_group_name")
+      or os.environ.get("init_group_name")
+      or "Bot Testing"
+    ).strip()
+    if init_group_name and not self._group_name_matches(group_id, init_group_name):
+      return None
+
     return self.send_init_msg()
+
+  def _group_name_matches(self, group_id: str, expected_name: str) -> bool:
+    expected = expected_name.strip().lower()
+    if not expected:
+      return True
+
+    token = str(self.token or os.environ.get("token") or "")
+    if not token:
+      return False
+
+    payload = self.group if isinstance(self.group, dict) else None
+    if isinstance(payload, dict):
+      group_obj = payload.get("group")
+      subgroup_obj = payload.get("subgroup")
+      for candidate in (payload, group_obj, subgroup_obj):
+        if not isinstance(candidate, dict):
+          continue
+        name_value = candidate.get("name")
+        if name_value is not None and str(name_value).strip().lower() == expected:
+          return True
+
+    try:
+      group = Group(group_id, token=token)
+      payload = group.get()
+    except Exception:
+      return False
+
+    if not isinstance(payload, dict):
+      return False
+
+    for candidate in (payload, payload.get("group"), payload.get("subgroup")):
+      if not isinstance(candidate, dict):
+        continue
+      name_value = candidate.get("name")
+      if name_value is not None and str(name_value).strip().lower() == expected:
+        return True
+
+    return False
 
   def send_init_msg(self):
     return self.respond(reply="Hey, I'm FoodieBot! I'm going to be your friend today.")
