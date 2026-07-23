@@ -5,7 +5,7 @@ import inspect
 import importlib
 import pkgutil
 from dataclasses import dataclass
-from typing import Callable
+from typing import Any, Callable
 
 from client.commands.base import Command
 from client.commands.result import CommandResult, CommandResultLike
@@ -37,6 +37,7 @@ class CommandContext:
   sender_id: str = ""
   group_id: str = ""
   token: str = ""
+  raw_message: dict[str, Any] | None = None
 
 
 CommandHandler = Callable[[ParsedMessage, CommandContext], CommandResultLike]
@@ -224,6 +225,7 @@ class CommandRouter:
     sender_id: str = "",
     group_id: str = "",
     token: str = "",
+    raw_message: dict[str, Any] | None = None,
   ) -> CommandResultLike:
     parsed = self.parser.parse(text)
     if not parsed:
@@ -239,6 +241,7 @@ class CommandRouter:
       sender_id=sender_id,
       group_id=group_id,
       token=token,
+      raw_message=raw_message,
     )
 
     for precondition in self.command_preconditions.get(command_name, []):

@@ -159,6 +159,7 @@ class Client:
       sender_id=sender_id,
       group_id=group_id,
       token=token,
+      raw_message=message,
     )
     normalized = normalize_command_result(command_output)
     if normalized is None:
